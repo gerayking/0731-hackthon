@@ -1,4 +1,4 @@
-import type { ExplanationSnapshot } from "@/contracts/snapshots";
+import type { ExplanationSnapshot } from "@/src/contracts/snapshots";
 
 export type ExplanationInput = {
   selectedReasons: ExplanationSnapshot["selectedReasons"];

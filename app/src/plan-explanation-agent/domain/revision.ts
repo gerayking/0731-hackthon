@@ -1,4 +1,4 @@
-import type { PlanChangeRequest } from "@/contracts/snapshots";
+import type { PlanChangeRequest } from "@/src/contracts/snapshots";
 
 export type RevisionRequest = PlanChangeRequest;
 

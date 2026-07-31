@@ -1,4 +1,4 @@
-import type { Plan, PlanChangeRequest, PlanningInputSnapshot } from "@/contracts/snapshots";
+import type { Plan, PlanChangeRequest, PlanningInputSnapshot } from "@/src/contracts/snapshots";
 
 export type NacPlanAdviceIntent = "explain" | "revise";
 

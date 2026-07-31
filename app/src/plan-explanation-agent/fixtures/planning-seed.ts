@@ -1,4 +1,4 @@
-import type { MealSession, Member, MenuItem, PlanningInputSnapshot, Requirement } from "@/contracts/snapshots";
+import type { MealSession, Member, MenuItem, PlanningInputSnapshot, Requirement } from "@/src/contracts/snapshots";
 
 export const planningSeed: PlanningInputSnapshot = {
   menu: [

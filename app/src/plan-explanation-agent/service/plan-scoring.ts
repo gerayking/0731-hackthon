@@ -1,6 +1,6 @@
-import { getMemberName } from "@/plan-explanation-agent/domain/planning-context";
-import type { PlanningContext } from "@/plan-explanation-agent/domain/planning-context";
-import type { Conflict, MealSession, Member, MenuItem, PlanItem, Requirement, Spiciness, Strategy } from "@/contracts/snapshots";
+import { getMemberName } from "@/src/plan-explanation-agent/domain/planning-context";
+import type { PlanningContext } from "@/src/plan-explanation-agent/domain/planning-context";
+import type { Conflict, MealSession, Member, MenuItem, PlanItem, Requirement, Spiciness, Strategy } from "@/src/contracts/snapshots";
 
 export const spicinessRank: Record<Spiciness, number> = {
   none: 0,
@@ -8,6 +8,14 @@ export const spicinessRank: Record<Spiciness, number> = {
   medium: 2,
   hot: 3,
   any: 4,
+  "不辣": 0,
+  "微辣": 1,
+  "中辣": 2,
+  "特辣": 3,
+  "麻辣": 3,
+  "香辣": 2,
+  "辣一点": 1,
+  "清汤": 0,
 };
 
 export type DishEligibility = {

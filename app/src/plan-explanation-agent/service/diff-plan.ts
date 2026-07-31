@@ -1,4 +1,4 @@
-import type { Plan, PlanDiff } from "@/contracts/snapshots";
+import type { Plan, PlanDiff } from "@/src/contracts/snapshots";
 
 export function diffPlans(before: Plan, after: Plan): PlanDiff {
   const beforeItems = new Map(before.items.map((item) => [item.dishId, item]));

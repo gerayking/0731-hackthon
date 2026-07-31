@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { planningInputSnapshotSchema } from "@/contracts/snapshots";
-import { generatePlanResult } from "@/plan-explanation-agent/service/generate-plan";
+import { planningInputSnapshotSchema } from "@/src/contracts/snapshots";
+import { generatePlanResult } from "@/src/plan-explanation-agent/service/generate-plan";
 
 export async function POST(request: Request): Promise<NextResponse> {
   let body: unknown;

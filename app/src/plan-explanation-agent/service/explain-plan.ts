@@ -1,6 +1,6 @@
-import { buildPlanningContext } from "@/plan-explanation-agent/domain/planning-context";
-import { getDishMemberEligibility, getEligibleDishMap } from "@/plan-explanation-agent/service/plan-scoring";
-import type { BudgetExplanation, Conflict, ExplanationSnapshot, ExcludedItemReason, MemberRequirementStatus, Plan, PlanningInputSnapshot, SelectedReason } from "@/contracts/snapshots";
+import { buildPlanningContext } from "@/src/plan-explanation-agent/domain/planning-context";
+import { getDishMemberEligibility, getEligibleDishMap } from "@/src/plan-explanation-agent/service/plan-scoring";
+import type { BudgetExplanation, Conflict, ExplanationSnapshot, ExcludedItemReason, MemberRequirementStatus, Plan, PlanningInputSnapshot, SelectedReason } from "@/src/contracts/snapshots";
 
 export function explainPlan(snapshot: PlanningInputSnapshot, plan: Plan): ExplanationSnapshot {
   const context = buildPlanningContext(snapshot);

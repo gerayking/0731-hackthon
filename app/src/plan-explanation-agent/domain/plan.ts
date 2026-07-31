@@ -1,4 +1,4 @@
-import type { BudgetExplanation, Conflict, ExcludedItemReason, ExplanationSnapshot, MemberRequirementStatus, Plan, PlanItem, PlanResult, SelectedReason } from "@/contracts/snapshots";
+import type { BudgetExplanation, Conflict, ExcludedItemReason, ExplanationSnapshot, MemberRequirementStatus, Plan, PlanItem, PlanResult, SelectedReason } from "@/src/contracts/snapshots";
 
 export type PlanServiceError = Conflict;
 

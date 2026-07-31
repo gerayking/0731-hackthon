@@ -1,8 +1,10 @@
 # app
 
-本目录是 Next.js + TypeScript 点餐系统前端/服务端应用。
+这是 North Food 的 Next.js 项目，基于 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) 初始化。
 
 ## 本地启动
+
+首先，安装依赖并启动开发服务器：
 
 ```bash
 pnpm install
@@ -106,3 +108,11 @@ pnpm build
 ## Vercel Preview
 
 PR 合并到 GitHub 后，Vercel 会为功能分支生成 Preview URL。打开 PR 页面即可看到 `Vercel Preview URL`，Demo 时优先验证 `/plans` 页面和 `/api/plans/*` 接口。
+
+## 了解更多
+
+了解更多 Next.js 信息，可以参考以下资源：
+
+- [Next.js GitHub 仓库](https://github.com/vercel/next.js)
+- [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
+- [Next.js 部署文档](https://nextjs.org/docs/app/building-your-application/deploying)

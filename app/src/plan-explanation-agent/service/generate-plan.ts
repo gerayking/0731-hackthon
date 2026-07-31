@@ -1,6 +1,6 @@
-import { buildPlanningContext } from "@/plan-explanation-agent/domain/planning-context";
-import { createConflict, createPlanItem, getEligibleDishMap, getPlanTotalPrice, getStrategyLabel, type GeneratePlanOptions } from "@/plan-explanation-agent/service/plan-scoring";
-import type { Conflict, Plan, PlanItem, PlanResult, PlanningInputSnapshot, Strategy } from "@/contracts/snapshots";
+import { buildPlanningContext } from "@/src/plan-explanation-agent/domain/planning-context";
+import { createConflict, createPlanItem, getEligibleDishMap, getPlanTotalPrice, getStrategyLabel, type GeneratePlanOptions } from "@/src/plan-explanation-agent/service/plan-scoring";
+import type { Conflict, Plan, PlanItem, PlanResult, PlanningInputSnapshot, Strategy } from "@/src/contracts/snapshots";
 
 export type GeneratePlanResponse = PlanResult;
 

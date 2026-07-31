@@ -1,17 +1,33 @@
 import { z } from "zod";
 
-export const spicinessSchema = z.enum(["none", "mild", "medium", "hot", "any"]);
+export const spicinessSchema = z.enum([
+  "none",
+  "mild",
+  "medium",
+  "hot",
+  "any",
+  "不辣",
+  "微辣",
+  "中辣",
+  "特辣",
+  "麻辣",
+  "香辣",
+  "辣一点",
+  "清汤",
+]);
 export const requirementTypeSchema = z.enum([
   "exclude_ingredient",
   "exclude_category",
   "spiciness_upper_bound",
   "prefer_spicy",
+  "prefer_category",
   "prefer_cheap",
   "vegetarian",
+  "unknown",
   "other",
 ]);
 export const hardnessSchema = z.enum(["hard", "soft"]);
-export const requirementStatusSchema = z.enum(["active", "revoked"]);
+export const requirementStatusSchema = z.enum(["active", "revoked", "overridden"]);
 export const strategySchema = z.enum(["balanced", "cheap", "coverage"]);
 
 export const memberSchema = z.object({
@@ -46,6 +62,7 @@ export const menuItemSchema = z.object({
   suggestedServings: z.number().int().positive().optional(),
   confidence: z.number().min(0).max(1).optional(),
   confirmedFields: z.array(z.string()).optional(),
+  lowConfidenceFields: z.array(z.string()).optional(),
 });
 
 export const requirementSchema = z.object({

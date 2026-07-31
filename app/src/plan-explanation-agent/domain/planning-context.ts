@@ -1,4 +1,4 @@
-import type { MealSession, MenuItem, PlanningInputSnapshot, Requirement, Strategy } from "@/contracts/snapshots";
+import type { MealSession, MenuItem, PlanningInputSnapshot, Requirement, Strategy } from "@/src/contracts/snapshots";
 
 export type ActiveRequirement = Requirement & {
   status: "active";

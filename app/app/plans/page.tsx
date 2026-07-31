@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { explainPlan } from "@/plan-explanation-agent/service/explain-plan";
-import { generatePlan } from "@/plan-explanation-agent/service/generate-plan";
-import { revisePlan } from "@/plan-explanation-agent/service/revise-plan";
-import { planningSeed } from "@/plan-explanation-agent/fixtures/planning-seed";
-import type { PlanChangeRequest, PlanResult } from "@/contracts/snapshots";
+import { explainPlan } from "@/src/plan-explanation-agent/service/explain-plan";
+import { generatePlan } from "@/src/plan-explanation-agent/service/generate-plan";
+import { revisePlan } from "@/src/plan-explanation-agent/service/revise-plan";
+import { planningSeed } from "@/src/plan-explanation-agent/fixtures/planning-seed";
+import type { PlanChangeRequest, PlanResult } from "@/src/contracts/snapshots";
 
 export default function PlansDemoPage() {
   const [strategy, setStrategy] = useState<"balanced" | "cheap" | "coverage">("balanced");

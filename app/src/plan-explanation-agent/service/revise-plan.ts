@@ -1,6 +1,6 @@
-import { diffPlans } from "@/plan-explanation-agent/service/diff-plan";
-import { generatePlan } from "@/plan-explanation-agent/service/generate-plan";
-import type { PlanChangeRequest, PlanDiff, PlanResult, RevisionInputSnapshot } from "@/contracts/snapshots";
+import { diffPlans } from "@/src/plan-explanation-agent/service/diff-plan";
+import { generatePlan } from "@/src/plan-explanation-agent/service/generate-plan";
+import type { PlanChangeRequest, PlanDiff, PlanResult, RevisionInputSnapshot } from "@/src/contracts/snapshots";
 
 export type RevisePlanResponse = {
   result: PlanResult;

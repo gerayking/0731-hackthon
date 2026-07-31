@@ -1,0 +1,76 @@
+{
+  "affects": "src/ocr-requirement-agent, app/api/ocr, app/api/requirements",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0003",
+  "status": "implementing",
+  "tags": [
+    "m2",
+    "ocr",
+    "agent",
+    "requirements"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "implemented",
+      "title": "定义 M2 类型与 zod schema"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T2",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现菜单 OCR / 文本解析器"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现用户需求解析器"
+    },
+    {
+      "depends_on": [
+        "T1",
+        "T3"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现 AgentIntent 生成逻辑"
+    },
+    {
+      "depends_on": [
+        "T2",
+        "T4"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现 M2 API Route Handlers"
+    },
+    {
+      "depends_on": [
+        "T2",
+        "T3",
+        "T4",
+        "T5"
+      ],
+      "id": "T6",
+      "ref": null,
+      "status": "pending",
+      "title": "实现 M2 UI 与 demo fixture"
+    }
+  ],
+  "title": "M2 OCR 与用户需求 Agent 模块任务拆解",
+  "updated": "2026-07-31"
+}
