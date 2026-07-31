@@ -1,0 +1,4 @@
+interface:
+  display_name: "Green Ibis Site Constitution"
+  short_description: "RFC-first workflow and Feishu task tracking for Green Ibis group 3."
+  default_prompt: "Use the Green Ibis Site Constitution before starting development in this repo."
