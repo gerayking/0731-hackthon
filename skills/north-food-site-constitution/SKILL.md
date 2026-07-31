@@ -1,13 +1,13 @@
 ---
-name: green-ibis-site-constitution
-description: Use for the Green Ibis hackathon group 3 repository when starting development, writing RFCs, creating/updating Feishu Base development tasks, claiming tasks, updating task status/assignee, or following the local AGENTS.md site constitution. Trigger on requests like “先写 RFC”, “创建开发任务”, “认领任务”, “更新状态”, “第3组绿色 Ibis 配送系统开发待办”, or any change that needs RFC-first workflow enforcement.
+name: north-food-site-constitution
+description: Use for the North Food hackathon group 3 repository when starting development, writing RFCs, creating/updating Feishu Base development tasks, claiming tasks, updating task status/assignee, or following the local AGENTS.md site constitution. Trigger on requests like “先写 RFC”, “创建开发任务”, “认领任务”, “更新状态”, “第 3 组 North Food 开发待办”, or any change that needs RFC-first workflow enforcement.
 ---
 
-# Green Ibis Site Constitution Skill
+# North Food Site Constitution Skill
 
 ## Purpose
 
-This skill turns the local `AGENTS.md` into an actionable workflow for the 第 3 组「绿色 Ibis 配送系统」repository. Use it before starting any development work so RFCs, Feishu Base tasks, ownership, and status updates stay consistent.
+This skill turns the local `AGENTS.md` into an actionable workflow for the 第 3 组「North Food」repository. Use it before starting any development work so RFCs, Feishu Base tasks, ownership, and status updates stay consistent.
 
 ## Required workflow
 
@@ -16,7 +16,7 @@ This skill turns the local `AGENTS.md` into an actionable workflow for the 第 3
    - The RFC must cover background, goals, non-goals, scope, design, acceptance criteria, risks, dependencies, and rollback/verification plan.
 
 2. **Create or update the Feishu Base task**
-   - Base: `第3组-绿色Ibis配送系统开发待办`
+   - Base: `第 3 组 North Food 开发待办`
    - URL: `https://sxddhcrtbqu.feishu.cn/base/ZkmTb8cl9aqfBesBXmic6qTonqe`
    - Table: `开发任务`
    - Initial status: `待认领`

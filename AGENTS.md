@@ -1,10 +1,10 @@
 # AGENTS.md
 
-这是 North Hackathon Topic B「Agent 驱动点餐系统」的仓库级 Agent 指令。所有参与本项目的 AI Agent 都必须遵守。
+这是 North Food（North Hackathon Topic B「Agent 驱动点餐系统」）的仓库级 Agent 指令。所有参与本项目的 AI Agent 都必须遵守。
 
 ## 1. 最高目标
 
-本项目参加 North Hackathon Topic B：**点餐系统**。
+本项目参加 North Hackathon Topic B：**North Food（Agent 驱动点餐系统）**。
 
 最终交付必须是一个可本地运行、可 Vercel 分支预览部署、Agent 真正参与核心业务流程的 TypeScript/Rust 项目。
 
@@ -448,11 +448,11 @@ Demo 必须固定脚本，禁止临场发挥。
 
 如果信息不足，先提问，不要擅自假设。
 
-## 19. 第 3 组绿色 Ibis 现场开发规则
+## 19. 第 3 组 North Food 现场开发规则
 
-第 3 组「绿色 Ibis 配送系统」的现场协作规则必须同时遵守本文件的项目级 Agent 指令，并执行以下补充流程。
+第 3 组「North Food」的现场协作规则必须同时遵守本文件的项目级 Agent 指令，并执行以下补充流程。
 
-本节的现场方案由四部分共同组成：根目录 `AGENTS.md` 中的 Agent 宪法、`docs/rfcs/0001-site-constitution.md` 的设计 RFC、`现场文件.md` 中的飞书多维表格配置，以及 `skills/green-ibis-site-constitution/SKILL.md` 对应的 Codex skill。后续开发前必须同时遵循这四部分，不能只执行其中一部分。
+本节的现场方案由四部分共同组成：根目录 `AGENTS.md` 中的 Agent 宪法、`docs/rfcs/0001-site-constitution.md` 的设计 RFC、`现场文件.md` 中的飞书多维表格配置，以及 `skills/north-food-site-constitution/SKILL.md` 对应的 Codex skill。后续开发前必须同时遵循这四部分，不能只执行其中一部分。
 
 ### 19.1 最高原则
 
@@ -465,7 +465,7 @@ Demo 必须固定脚本，禁止临场发挥。
 
 第 3 组现场任务统一维护在飞书多维表格：
 
-- Base：`第3组-绿色Ibis配送系统开发待办`
+- Base：`第 3 组 North Food 开发待办`
 - URL：https://sxddhcrtbqu.feishu.cn/base/ZkmTb8cl9aqfBesBXmic6qTonqe
 - 数据表：`开发任务`
 
@@ -501,5 +501,5 @@ Demo 必须固定脚本，禁止临场发挥。
 ### 19.4 现场文件与 Skill
 
 - `现场文件.md`：记录飞书多维表格配置、字段说明和现场开发流程。
-- `skills/green-ibis-site-constitution/SKILL.md`：给 Codex 使用的第 3 组现场开发宪法 skill。
+- `skills/north-food-site-constitution/SKILL.md`：给 Codex 使用的第 3 组现场开发宪法 skill。
 - `docs/rfcs/0001-site-constitution.md`：记录本现场规则的设计 RFC。
