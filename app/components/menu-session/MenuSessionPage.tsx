@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { createMockMenuSessionApiClient } from "@/src/menu-session/api"
+import { CandidateConfirmationPanel } from "@/components/candidate-confirmation/CandidateConfirmationPanel"
 import type {
   MealSessionInput,
   MemberInput,
@@ -476,9 +477,13 @@ export function MenuSessionPage() {
               totalMenuPrice={totalMenuPrice}
               onRefresh={refreshAll}
             />
-            <IntegrationPanel />
           </aside>
         </main>
+
+        <CandidateConfirmationPanel
+          menuSessionSnapshot={snapshot}
+          onRefresh={refreshAll}
+        />
       </div>
     </div>
   )
@@ -922,23 +927,6 @@ function MetricCard({ label, value }: MetricCardProps) {
       <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
       <p className="mt-2 text-2xl font-bold">{value}</p>
     </div>
-  )
-}
-
-function IntegrationPanel() {
-  return (
-    <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="text-xl font-semibold">T5 接入位</h2>
-      <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-        这里保留 M2 候选逐项确认与 M3 mock 面板的入口。T4 已完成菜单 CRUD、
-        组局 CRUD 与 snapshot 输出；T5 可基于同一 snapshot 继续接入候选确认流程。
-      </p>
-      <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-zinc-600 dark:text-zinc-300">
-        <li>M2：从示例文本生成候选，并逐项确认字段。</li>
-        <li>M3：读取 M1 snapshot，展示 PlanningInputSnapshot 示例。</li>
-        <li>所有 mock 数据必须标注来源，不能直接绕过后端业务规则。</li>
-      </ul>
-    </section>
   )
 }
 
