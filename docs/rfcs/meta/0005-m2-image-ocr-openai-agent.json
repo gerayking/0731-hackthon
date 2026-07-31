@@ -1,0 +1,75 @@
+{
+  "affects": "app/app/api/ocr/extract-menu; app/app/api/requirements/parse; app/src/ocr-requirement-agent; app/README.md",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0005",
+  "status": "draft",
+  "tags": [
+    "m2",
+    "ocr",
+    "openai",
+    "agent",
+    "requirements"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "pending",
+      "title": "扩展 M2 契约与 OpenAI 配置"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T2",
+      "ref": null,
+      "status": "pending",
+      "title": "实现图片上传校验与解码"
+    },
+    {
+      "depends_on": [
+        "T1",
+        "T2"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "pending",
+      "title": "实现 OpenAI Vision OCR Adapter"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "pending",
+      "title": "实现需求理解 Agent Adapter"
+    },
+    {
+      "depends_on": [
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "pending",
+      "title": "更新 M2 API Route Handlers"
+    },
+    {
+      "depends_on": [
+        "T5"
+      ],
+      "id": "T6",
+      "ref": null,
+      "status": "pending",
+      "title": "补充测试、README 与质量门禁"
+    }
+  ],
+  "title": "M2 图片 OCR 与 OpenAI 需求 Agent 能力",
+  "updated": "2026-07-31"
+}
