@@ -1,8 +1,8 @@
-# RFC-0000: PR RC 编号与合并冲突门禁
+# RFC-0000: PR RC 编号、RFC 编号与合并冲突门禁
 
 ## 摘要
 
-本 RFC 定义项目 PR 的最低发布候选（RC）门禁：所有 Pull Request 必须在标题或正文中包含 `RC-数字` 编号，且 PR 与目标分支之间不能存在合并冲突。门禁通过 GitHub Actions 在 `pull_request` 事件上执行，失败时仅通过 workflow 状态和日志提示，不自动评论，避免引入额外的通知权限和评论噪声。
+本 RFC 定义项目 PR 的最低发布候选（RC）门禁：所有 Pull Request 必须在标题或正文中包含 `RC-数字` 编号，`docs/rfcs/` 下的 RFC Markdown 与 meta JSON 编号必须唯一且命名合规，且 PR 与目标分支之间不能存在合并冲突。门禁通过 GitHub Actions 在 `pull_request` 事件上执行，失败时仅通过 workflow 状态和日志提示，不自动评论，避免引入额外的通知权限和评论噪声。
 
 该门禁不替代项目已有的质量检查（安装、类型检查、lint、测试、build、禁止文件检查等），而是作为 PR 可进入评审和合并前的基础秩序约束。
 
@@ -11,9 +11,10 @@
 项目采用 PR-only merge 流程，任何代码合入 `main` 都必须通过 Pull Request。当前研发规则要求 PR 关联 RFC 或任务、通过 CI、由队友 Review 后合并，但没有机器可执行地检查：
 
 1. PR 是否携带 RC 编号；
-2. PR 是否已经与目标分支产生合并冲突。
+2. RFC 目录中的 Markdown 与 meta JSON 编号是否唯一、命名是否合规；
+3. PR 是否已经与目标分支产生合并冲突。
 
-缺少这两项检查会导致：
+缺少这些检查会导致：
 
 - release/submission 前难以快速筛选可发布候选；
 - 评审开始前 PR 已经不可合并，浪费 Review 时间；
@@ -35,10 +36,11 @@ workflow 监听 Pull Request 的常见状态变化事件：
 
 workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 
-该 job 执行两类检查：
+该 job 执行三类检查：
 
 1. **RC 编号检查**：读取 PR 标题和正文，只要任意一处包含 `RC-数字` 即通过。
-2. **合并冲突检查**：使用 GitHub CLI 查询 PR 的 `mergeable` 字段；当值为 `CONFLICTING` 时失败。
+2. **RFC 编号检查**：扫描 `docs/rfcs/*.md` 与 `docs/rfcs/meta/*.json`，要求文件名符合 `NNNN-slug` 格式，且同一类文件内编号不重复。
+3. **合并冲突检查**：使用 GitHub CLI 查询 PR 的 `mergeable` 字段；当值为 `false` 或 `null` 时失败。
 
 ### 概念模型
 
@@ -46,6 +48,7 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 |---|---|---|
 | PR Gate | GitHub Actions 中执行的门禁集合 | `.github/workflows/pr-gate.yml` |
 | RC 编号 | 形如 `RC-123` 的发布候选标识 | PR 作者维护在标题或正文 |
+| RFC 编号 | `docs/rfcs/NNNN-slug.md` 和 `docs/rfcs/meta/NNNN-slug.json` 中的四位编号 | RFC 作者维护在文件名 |
 | 合并冲突状态 | GitHub 根据 head 与 base 计算的 `mergeable` 状态 | GitHub 平台维护 |
 | 门禁结果 | workflow 成功或失败 | GitHub Actions 维护 |
 
@@ -62,7 +65,18 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 - 兼容团队成员已有填写习惯；
 - 不强制所有人立即调整 PR 标题格式，降低迁移成本。
 
-#### 决策 2：发现冲突时直接失败
+#### 决策 2：RFC 目录编号必须唯一
+
+推荐默认值：`docs/rfcs/NNNN-slug.md` 与 `docs/rfcs/meta/NNNN-slug.json` 的文件名均以四位编号开头，且同一类文件内编号不重复。
+
+原因：
+
+- RFC 编号是项目设计文档的主索引；
+- 重复编号会让 `docs/rfcs/README.md`、`docs/rfcs/meta/*.json` 和人工阅读都产生歧义；
+- 在 PR Gate 中做轻量扫描，可以在评审前发现目录漂移；
+- 该检查只依赖文件名和目录结构，不读取敏感环境变量。
+
+#### 决策 3：发现冲突时直接失败
 
 当 GitHub 判定 PR 与目标分支存在合并冲突时，workflow 直接失败。
 
@@ -72,7 +86,7 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 - 直接失败能尽早提醒作者更新分支；
 - 与项目“CI 未通过的 PR 不得合并”的规则一致。
 
-#### 决策 3：不自动评论
+#### 决策 4：不自动评论
 
 门禁失败时不自动在 PR 下评论，仅依赖 workflow 失败状态和日志。
 
@@ -83,9 +97,9 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 - 避免重复评论造成噪声；
 - 当前项目没有要求自动通知机制。
 
-#### 决策 4：门禁不替代质量 CI
+#### 决策 5：门禁不替代质量 CI
 
-本 RFC 只覆盖 RC 编号和冲突检查。项目已有的 `pnpm install / typecheck / lint / test / build`、Rust 检查、禁止文件检查等仍应由其他 CI workflow 或后续 RFC 子任务覆盖。
+本 RFC 覆盖 PR RC 编号、RFC 目录编号和冲突检查。项目已有的 `pnpm install / typecheck / lint / test / build`、Rust 检查、禁止文件检查等仍应由其他 CI workflow 或后续 RFC 子任务覆盖。
 
 ### 接口契约
 
@@ -97,6 +111,8 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 |---|---|---|
 | `github.event.pull_request.title` | Pull Request 标题 | RC 编号检查 |
 | `github.event.pull_request.body` | Pull Request 正文 | RC 编号检查 |
+| `docs/rfcs/*.md` | 当前 PR 工作树中的 RFC Markdown | RFC 编号检查 |
+| `docs/rfcs/meta/*.json` | 当前 PR 工作树中的 RFC meta | RFC 编号检查 |
 | `github.event.pull_request.number` | Pull Request 编号 | `gh pr view` 查询冲突状态 |
 | `github.event.pull_request.base.ref` | 目标分支名 | 失败日志提示 |
 | `github.event.pull_request.head.sha` | 当前 PR head SHA | workflow 上下文，可选保留 |
@@ -146,8 +162,11 @@ flowchart TD
   A[Pull Request 事件] --> B[PR Gate workflow]
   B --> C{标题或正文包含 RC-数字?}
   C -- 否 --> F[workflow 失败]
-  C -- 是 --> D[查询 GitHub mergeable]
-  D --> E{mergeable == CONFLICTING?}
+  C -- 是 --> H[扫描 RFC 目录编号]
+  H --> I{编号命名合规且不重复?}
+  I -- 否 --> F
+  I -- 是 --> D[查询 GitHub mergeable]
+  D --> E{mergeable == false 或 null?}
   E -- 是 --> F
   E -- 否 --> G[workflow 成功]
 ```

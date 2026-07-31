@@ -233,6 +233,13 @@ chore(vercel): add preview deployment config
 7. 通过 CI 检查；
 8. 至少一名队友 Review 后合并。
 
+PR 还必须通过 `.github/workflows/pr-gate.yml` 中的基础门禁：
+
+- PR 标题或正文至少包含一个发布候选编号，格式为 `RC-数字`，例如 `RC-123`；
+- `docs/rfcs/` 下的 RFC Markdown 与 meta JSON 文件名必须使用 `NNNN-slug` 格式，且同一类文件内编号不重复；
+- PR 与目标分支不能存在合并冲突；
+- 门禁失败时不会自动评论，需查看 GitHub Actions 状态和日志修复。
+
 PR 模板：
 
 ```md
