@@ -1,5 +1,5 @@
 type: agent
-name: potluck_order_agent
+name: north_food_intent_agent
 max_context_tokens: 200000
 system_prompt: ./system-prompt.md
 system_prompt_type: jinja

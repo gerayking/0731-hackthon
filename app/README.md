@@ -1,28 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# app
 
-## Getting Started
+这是 North Food 的 Next.js 项目，基于 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) 初始化。
 
-First, run the development server:
+## 本地启动
+
+首先，安装依赖并启动开发服务器：
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+启动后打开 <http://localhost:3000>。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the page.
+## M3 方案生成与解释模块
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+M3 负责把 `PlanningInputSnapshot` 转换成可解释、可调整的点餐方案。第一版采用 TypeScript 规则优先，NAC 只预留 adapter 接口，不直接生成最终业务状态。
 
-## M1 Route Handlers API
+### 功能入口
 
-T3 已实现 RFC-0006 要求的 M1 菜单与组局 Route Handlers。启动开发服务器后，可用以下命令验证基础 CRUD：
+- M3 Demo 页面：<http://localhost:3000/plans>
+- 生成方案：`POST /api/plans/generate`
+- 解释方案：`POST /api/plans/explain`
+- 调整方案：`POST /api/plans/revise`
+
+### API 示例
+
+#### 生成方案
+
+```bash
+curl -X POST http://localhost:3000/api/plans/generate \
+  -H "Content-Type: application/json" \
+  -d @- <<'JSON'
+{
+  "menu": [
+    {
+      "id": "dish_001",
+      "name": "清炒时蔬饭",
+      "price": 32,
+      "category": "主食",
+      "spiciness": "none",
+      "ingredients": ["青菜", "米饭"],
+      "containsPork": false,
+      "containsBeef": false,
+      "containsChicken": false,
+      "containsSeafood": false,
+      "containsPeanut": false,
+      "containsEgg": false,
+      "containsDairy": false,
+      "isVegetarian": true,
+      "suggestedServings": 1,
+      "confidence": 0.95
+    }
+  ],
+  "session": {
+    "id": "session_demo",
+    "budget": 100,
+    "memberCount": 1,
+    "members": [
+      { "id": "member_a", "name": "A" }
+    ],
+    "promotions": []
+  },
+  "requirementsByMember": {
+    "member_a": []
+  },
+  "strategy": "cheap"
+}
+JSON
+```
+
+#### 解释方案
+
+```bash
+curl -X POST http://localhost:3000/api/plans/explain \
+  -H "Content-Type: application/json" \
+  -d '{"snapshot": <上面 generate 的输入>, "plan": <返回的 plan>}'
+```
+
+#### 调整方案
+
+```bash
+curl -X POST http://localhost:3000/api/plans/revise \
+  -H "Content-Type: application/json" \
+  -d '{"previousPlan": <上一个 plan>, "currentContext": <PlanningInputSnapshot>, "requestedChanges": [{"type": "remove_item", "dishId": "dish_001"}]}'
+```
+
+## M1 菜单与组局模块
+
+M1 维护真实可用的菜单与组局状态，并向 M3 输出 `MenuSessionSnapshot`。详见 RFC-0006（`docs/rfcs/0006-m1-menu-session.md`）。
+
+### 功能入口
+
+- M1 Demo 页面：<http://localhost:3000/menu-session>
+- 菜单 CRUD：`GET/POST /api/menu/items`、`PATCH/DELETE /api/menu/items/[id]`
+- 组局 CRUD：`GET/POST /api/session`、`PATCH/DELETE /api/session/[id]`
+- 候选逐项确认：`POST /api/menu/candidates/confirm`
+- 快照输出：`GET /api/menu-session/snapshot`
+
+### API 示例
 
 ```bash
 # 创建菜单项
@@ -39,17 +115,63 @@ curl -sS http://localhost:3000/api/menu-session/snapshot
 
 所有写入接口都会通过 zod schema 校验；无效输入返回 `400` 和统一结构化错误 JSON：`{ ok: false, error: { code, message, issues } }`。
 
-## Learn More
+M1 使用 `drizzle-orm` + `better-sqlite3` 持久化到 `app/.data/potluck.sqlite`，该目录已在 `.gitignore` 中忽略。
 
-To learn more about Next.js, take a look at the following resources:
+## 用户系统 SQLite 持久化
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+用户系统使用 SQLite 保存 Demo 所需的数据结构，当前 T2 初始化以下表：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `users`：用户主体、角色、昵称、忌口、预算提示、备注与时间戳；
+- `demo_user_sessions`：Demo 身份切换会话；
+- `schema_migrations`：迁移记录。
 
-## Deploy on Vercel
+迁移脚本位于 `app/scripts/migrate-user-system.ts`，通过 TypeScript 运行，不生成 `.js` 或 `.py` 文件。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm migrate:user-system
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+默认数据库文件：
+
+```text
+app/.data/user-system.sqlite
+```
+
+如需覆盖数据库路径，可设置环境变量：
+
+```bash
+USER_SYSTEM_DB_PATH=/tmp/demo-user-system.sqlite pnpm migrate:user-system
+```
+
+`.data/` 已加入 `.gitignore`，本地 Demo 数据不会被提交。
+
+## 验证
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+```
+
+完整 PR 质量门禁：
+
+```bash
+pnpm install
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+```
+
+## Vercel Preview
+
+PR 合并到 GitHub 后，Vercel 会为功能分支生成 Preview URL。打开 PR 页面即可看到 `Vercel Preview URL`，Demo 时优先验证 `/plans` 页面和 `/api/plans/*` 接口。
+
+## 了解更多
+
+了解更多 Next.js 信息，可以参考以下资源：
+
+- [Next.js GitHub 仓库](https://github.com/vercel/next.js)
+- [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
+- [Next.js 部署文档](https://nextjs.org/docs/app/building-your-application/deploying)

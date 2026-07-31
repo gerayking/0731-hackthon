@@ -1,0 +1,72 @@
+{
+  "affects": "app/app, app/package.json, app/tsconfig.json, app/README.md, docs/rfcs",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0001",
+  "status": "implementing",
+  "tags": [
+    "user-system",
+    "auth",
+    "demo",
+    "sqlite"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "implemented",
+      "title": "用户数据模型"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T2",
+      "ref": null,
+      "status": "implemented",
+      "title": "SQLite 持久化与迁移"
+    },
+    {
+      "depends_on": [
+        "T2"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "pending",
+      "title": "用户服务层接口"
+    },
+    {
+      "depends_on": [
+        "T3"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "pending",
+      "title": "Demo 会话与身份切换"
+    },
+    {
+      "depends_on": [
+        "T4"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "pending",
+      "title": "前端身份切换 UI"
+    },
+    {
+      "depends_on": [
+        "T3",
+        "T5"
+      ],
+      "id": "T6",
+      "ref": null,
+      "status": "pending",
+      "title": "测试与文档"
+    }
+  ],
+  "title": "用户系统",
+  "updated": "2026-07-31"
+}
