@@ -11,16 +11,16 @@ help: ## 查看可用命令
 install: ## 安装前端依赖
 	cd $(APP_DIR) && $(PACKAGE_MANAGER) install
 
-dev: ## 启动前端开发服务器
+dev: install ## 启动前端开发服务器
 	cd $(APP_DIR) && $(PACKAGE_MANAGER) run dev
 
-build: ## 构建前端项目
+build: install ## 构建前端项目
 	cd $(APP_DIR) && $(PACKAGE_MANAGER) run build
 
-start: ## 启动生产构建后的本地服务
+start: install ## 启动生产构建后的本地服务
 	cd $(APP_DIR) && $(PACKAGE_MANAGER) run start
 
-lint: ## 运行前端 lint
+lint: install ## 运行前端 lint
 	cd $(APP_DIR) && $(PACKAGE_MANAGER) run lint
 
 clean: ## 清理前端构建产物
