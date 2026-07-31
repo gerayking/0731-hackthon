@@ -1,4 +1,4 @@
-import { type NextRequest } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { parseRequirements } from "@/src/ocr-requirement-agent/parser/requirement-parser"
 import { ParseRequirementsInputSchema, ParseRequirementsOutputSchema } from "@/src/ocr-requirement-agent/domain"
 import {

@@ -1,4 +1,4 @@
-import { type NextRequest } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { parseMenuOcr } from "@/src/ocr-requirement-agent/parser/menu-ocr-parser"
 import { ExtractMenuOutputSchema, OcrInputSchema } from "@/src/ocr-requirement-agent/domain"
 import {
