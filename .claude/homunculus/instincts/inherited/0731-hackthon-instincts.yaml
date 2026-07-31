@@ -1,0 +1,299 @@
+# Instincts generated from https://github.com/gerayking/0731-hackthon
+# Generated: 2026-07-31T06:33:19.377Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: 0731-hackthon-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: docs
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: docs(ai-rules): add agent development constitution
+
+---
+id: 0731-hackthon-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Commit Length
+
+## Action
+
+Write moderate-length commit messages (~50 characters)
+
+## Evidence
+
+- Average commit message length: 50 chars
+- Based on 1 commits
+
+---
+id: 0731-hackthon-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: 0731-hackthon-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: 0731-hackthon-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: 0731-hackthon-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: 0731-hackthon-instinct-camelcase-functions
+trigger: "When defining a function in TypeScript"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Camelcase Functions
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: 0731-hackthon-instinct-pascalcase-classes
+trigger: "When defining a class in TypeScript"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Pascalcase Classes
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: 0731-hackthon-instinct-pascalcase-files
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Pascalcase Files
+
+## Action
+
+Name the file using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.files: PascalCase
+
+---
+id: 0731-hackthon-instinct-screaming-snake-constants
+trigger: "When declaring a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Screaming Snake Constants
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: 0731-hackthon-instinct-relative-imports
+trigger: "When importing modules in TypeScript"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Relative Imports
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: 0731-hackthon-instinct-named-exports
+trigger: "When exporting from a module"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Named Exports
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: 0731-hackthon-instinct-separate-tests
+trigger: "When adding or organizing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Separate Tests
+
+## Action
+
+Place test files in a separate folder from source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: separate
+
+---
+id: 0731-hackthon-instinct-conventional-commits-docs
+trigger: "When making a commit related to documentation"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Conventional Commits Docs
+
+## Action
+
+Use the conventional commit prefix 'docs' followed by the scope in parentheses
+
+## Evidence
+
+- Pattern in commits.prefixes: docs
+- Example: docs(ai-rules): add agent development constitution
+
+---
+id: 0731-hackthon-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: gerayking/0731-hackthon
+---
+
+# 0731 Hackthon Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 50 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 50
+
