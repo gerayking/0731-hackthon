@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   rc-number-and-conflict-gate:
@@ -23,7 +24,7 @@ jobs:
           script: |
             const title = context.payload.pull_request.title ?? "";
             const body = context.payload.pull_request.body ?? "";
-            const rcPattern = /(?:^|\s)RC-\d+(?:\b|$)/;
+            const rcPattern = /(^|[^A-Za-z0-9])RC-\d+(?![A-Za-z0-9])/;
             const hasRcNumber = rcPattern.test(title) || rcPattern.test(body);
 
             if (!hasRcNumber) {
@@ -36,10 +37,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          GH_REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
 
-          gh pr view "$PR_NUMBER" --json headRefName,mergeable,baseRefName --jq 'select(.mergeable == "CONFLICTING") | [.baseRefName, .headRefName] | @tsv' > /tmp/conflicting-pr.tsv
+          gh pr view "$PR_NUMBER" --repo "$GH_REPOSITORY" --json headRefName,mergeable,baseRefName --jq 'select(.mergeable == "CONFLICTING") | [.baseRefName, .headRefName] | @tsv' > /tmp/conflicting-pr.tsv
 
           if [ -s /tmp/conflicting-pr.tsv ]; then
             echo "当前 PR 与 $BASE_REF 存在合并冲突，无法通过门禁。"

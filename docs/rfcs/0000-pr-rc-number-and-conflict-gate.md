@@ -107,13 +107,14 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 正则：
 
 ```text
-(?:^|\s)RC-\d+(?:\b|$)
+(^|[^A-Za-z0-9])RC-\d+(?![A-Za-z0-9])
 ```
 
 通过示例：
 
 - `RC-123`
 - `feat(order): add cancellation flow RC-123`
+- `feat(order): add cancellation flow (RC-123)`
 - PR 正文中包含 `Release Candidate: RC-123`
 
 不通过示例：
@@ -122,6 +123,7 @@ workflow 只包含一个 job：`rc-number-and-conflict-gate`。
 - `RC`
 - `RC-abc`
 - `RC-123A`
+- `xRC-123`
 
 #### 冲突检查输出
 
