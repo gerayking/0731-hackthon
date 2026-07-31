@@ -15,9 +15,12 @@ permissions:
 
 jobs:
   rc-number-and-conflict-gate:
-    name: RC number and merge conflict gate
+    name: RC number, RFC number, and merge conflict gate
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Check RC number in PR title or body
         uses: actions/github-script@v7
         with:
@@ -30,6 +33,79 @@ jobs:
             if (!hasRcNumber) {
               core.setFailed("PR 标题或正文必须包含 RC 编号，格式为 RC-数字，例如 RC-123。");
             }
+
+      - name: Check RFC directory numbering
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rfc_dir="docs/rfcs"
+          meta_dir="docs/rfcs/meta"
+          errors=()
+
+          if [ ! -d "$rfc_dir" ]; then
+            errors+=("缺少 $rfc_dir 目录，无法检查 RFC 编号。")
+          fi
+
+          if [ ! -d "$meta_dir" ]; then
+            errors+=("缺少 $meta_dir 目录，无法检查 RFC meta 编号。")
+          fi
+
+          if [ ${#errors[@]} -gt 0 ]; then
+            printf "RFC 编号检查失败：\n"
+            printf "  - %s\n" "${errors[@]}"
+            exit 1
+          fi
+
+          while IFS= read -r file; do
+            base=$(basename "$file")
+            if [ "$base" = "README.md" ]; then
+              continue
+            fi
+
+            if [[ ! "$base" =~ ^[0-9]{4}-.+\.md$ ]]; then
+              errors+=("RFC Markdown 文件命名不符合 NNNN-slug.md：$file")
+              continue
+            fi
+
+            printf '%s\t%s\n' "${base:0:4}" "$file"
+          done < <(find "$rfc_dir" -maxdepth 1 -type f -name '*.md' | sort) > /tmp/rfc-markdown-numbers.tsv
+
+          while IFS= read -r file; do
+            base=$(basename "$file")
+            if [[ ! "$base" =~ ^[0-9]{4}-.+\.json$ ]]; then
+              errors+=("RFC meta 文件命名不符合 NNNN-slug.json：$file")
+              continue
+            fi
+
+            printf '%s\t%s\n' "${base:0:4}" "$file"
+          done < <(find "$meta_dir" -maxdepth 1 -type f -name '*.json' | sort) > /tmp/rfc-meta-numbers.tsv
+
+          while IFS=$'\t' read -r number file; do
+            duplicates=$(cut -f1 /tmp/rfc-markdown-numbers.tsv | sort | uniq -d)
+            if printf '%s\n' "$duplicates" | grep -qx "$number"; then
+              files=$(grep "^${number}"$'\t' /tmp/rfc-markdown-numbers.tsv | cut -f2 | paste -sd '、' -)
+              errors+=("RFC Markdown 编号 $number 重复：$files")
+            fi
+          done < /tmp/rfc-markdown-numbers.tsv
+
+          while IFS=$'\t' read -r number file; do
+            duplicates=$(cut -f1 /tmp/rfc-meta-numbers.tsv | sort | uniq -d)
+            if printf '%s\n' "$duplicates" | grep -qx "$number"; then
+              files=$(grep "^${number}"$'\t' /tmp/rfc-meta-numbers.tsv | cut -f2 | paste -sd '、' -)
+              errors+=("RFC meta 编号 $number 重复：$files")
+            fi
+          done < /tmp/rfc-meta-numbers.tsv
+
+          if [ ${#errors[@]} -gt 0 ]; then
+            printf "RFC 编号检查失败：\n"
+            printf "  - %s\n" "${errors[@]}"
+            exit 1
+          fi
+
+          markdown_count=$(wc -l < /tmp/rfc-markdown-numbers.tsv | tr -d ' ')
+          meta_count=$(wc -l < /tmp/rfc-meta-numbers.tsv | tr -d ' ')
+          echo "RFC 编号检查通过：Markdown $markdown_count 个，meta $meta_count 个。"
 
       - name: Check merge conflict
         shell: bash
