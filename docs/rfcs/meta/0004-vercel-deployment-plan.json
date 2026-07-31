@@ -1,0 +1,62 @@
+{
+  "affects": "app/package.json; vercel.json; .env.example; .github/workflows/pr-gate.yml; app/README.md; docs/rfcs/README.md",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0004",
+  "status": "draft",
+  "tags": [
+    "vercel",
+    "deployment",
+    "ci",
+    "preview"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "pending",
+      "title": "补齐 Vercel 与本地环境变量契约"
+    },
+    {
+      "depends_on": [],
+      "id": "T2",
+      "ref": null,
+      "status": "pending",
+      "title": "新增 Vercel 分支部署配置"
+    },
+    {
+      "depends_on": [
+        "T1",
+        "T2"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "pending",
+      "title": "增强 PR 质量门禁覆盖部署前检查"
+    },
+    {
+      "depends_on": [
+        "T2"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "pending",
+      "title": "更新 README 与 Demo 部署说明"
+    },
+    {
+      "depends_on": [
+        "T3",
+        "T4"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "pending",
+      "title": "执行本地构建与 Preview 可行性验证"
+    }
+  ],
+  "title": "Vercel 分支部署与 Preview 流程",
+  "updated": "2026-07-31"
+}
