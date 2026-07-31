@@ -86,6 +86,34 @@ curl -X POST http://localhost:3000/api/plans/revise \
   -d '{"previousPlan": <上一个 plan>, "currentContext": <PlanningInputSnapshot>, "requestedChanges": [{"type": "remove_item", "dishId": "dish_001"}]}'
 ```
 
+## 用户系统 SQLite 持久化
+
+用户系统使用 SQLite 保存 Demo 所需的数据结构，当前 T2 初始化以下表：
+
+- `users`：用户主体、角色、昵称、忌口、预算提示、备注与时间戳；
+- `demo_user_sessions`：Demo 身份切换会话；
+- `schema_migrations`：迁移记录。
+
+迁移脚本位于 `app/scripts/migrate-user-system.ts`，通过 TypeScript 运行，不生成 `.js` 或 `.py` 文件。
+
+```bash
+pnpm migrate:user-system
+```
+
+默认数据库文件：
+
+```text
+app/.data/user-system.sqlite
+```
+
+如需覆盖数据库路径，可设置环境变量：
+
+```bash
+USER_SYSTEM_DB_PATH=/tmp/demo-user-system.sqlite pnpm migrate:user-system
+```
+
+`.data/` 已加入 `.gitignore`，本地 Demo 数据不会被提交。
+
 ## 验证
 
 ```bash
