@@ -1,0 +1,4 @@
+interface:
+  display_name: "North Food Site Constitution"
+  short_description: "RFC-first workflow and Feishu task tracking for North Food group 3."
+  default_prompt: "Use the North Food Site Constitution before starting development in this repo."

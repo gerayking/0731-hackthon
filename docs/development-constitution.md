@@ -1,10 +1,10 @@
-# 开发宪法：North Hackathon Topic B 点餐系统
+# 开发宪法：North Food
 
 > 本文档是本项目研发阶段的最高开发规则。所有 RFC、PR、代码和 Demo 都必须遵守本文档；如需修改，必须通过团队共识并更新本文档。
 
 ## 1. 项目目标
 
-本项目参加 North Hackathon Topic B：**Agent 驱动点餐系统**。
+本项目参加 North Hackathon Topic B：**North Food（Agent 驱动点餐系统）**。
 
 最终交付必须满足：
 
@@ -402,7 +402,7 @@ Demo 数据必须随仓库提交。
 
 提交前必须确认：
 
-- [ ] 已选择 Topic B：点餐系统；
+- [ ] 已选择 Topic B：North Food（Agent 驱动点餐系统）；
 - [ ] 仓库为 Public；
 - [ ] `docs/development-constitution.md` 已提交；
 - [ ] `docs/rfcs/` 下至少有一份 RFC；
