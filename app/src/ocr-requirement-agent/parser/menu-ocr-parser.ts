@@ -151,15 +151,29 @@ const parseLine = (line: string): ParsedToken => {
   const flags = parseBooleanFlags(line)
   const suggestedServings = parseSuggestedServings(line)
 
-  return {
+  const token: Partial<ParsedToken> = {
     raw: line,
-    price,
-    category,
-    spiciness,
     ingredients,
     flags,
-    suggestedServings,
   }
+
+  if (price !== undefined) {
+    token.price = price
+  }
+
+  if (category !== undefined) {
+    token.category = category
+  }
+
+  if (spiciness !== undefined) {
+    token.spiciness = spiciness
+  }
+
+  if (suggestedServings !== undefined) {
+    token.suggestedServings = suggestedServings
+  }
+
+  return token as ParsedToken
 }
 
 const inferName = (line: string, price: number | undefined): string => {

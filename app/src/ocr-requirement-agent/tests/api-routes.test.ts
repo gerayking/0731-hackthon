@@ -62,7 +62,7 @@ describe("M2 API route handlers", () => {
 
     expect(response.status).toBe(200)
     const payload = await response.json()
-    expectObjectWithShape(payload, {
+    expect(payload).toMatchObject({
       snapshot: {
         requirementsByMember: {
           "member-api-001": expect.arrayContaining([

@@ -33,8 +33,8 @@ export async function parseJsonBody(request: Request): Promise<JsonBody | null> 
   }
 }
 
-export function parseRequestBody<TSchema extends ZodSchema>(request: Request, schema: TSchema): z.infer<TSchema> {
-  const body = parseJsonBody(request)
+export async function parseRequestBody<TSchema extends ZodSchema>(request: Request, schema: TSchema): Promise<z.infer<TSchema>> {
+  const body = await parseJsonBody(request)
   if (body === null) {
     throw createM2ApiError("invalid_request", "Request body must be a JSON object.")
   }

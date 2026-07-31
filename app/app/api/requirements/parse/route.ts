@@ -15,7 +15,7 @@ import {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const input = parseRequestBody(request, ParseRequirementsInputSchema)
+    const input = await parseRequestBody(request, ParseRequirementsInputSchema)
     const output = parseRequirements(input)
     const validatedOutput = ParseRequirementsOutputSchema.parse(output)
 

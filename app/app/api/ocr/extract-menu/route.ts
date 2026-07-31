@@ -15,7 +15,7 @@ import {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const input = parseRequestBody(request, OcrInputSchema)
+    const input = await parseRequestBody(request, OcrInputSchema)
     const snapshot = parseMenuOcr(input)
     const output = ExtractMenuOutputSchema.parse({ snapshot })
 
