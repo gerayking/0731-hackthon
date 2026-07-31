@@ -16,9 +16,28 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the page.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## M1 Route Handlers API
+
+T3 已实现 RFC-0006 要求的 M1 菜单与组局 Route Handlers。启动开发服务器后，可用以下命令验证基础 CRUD：
+
+```bash
+# 创建菜单项
+curl -sS http://localhost:3000/api/menu/items \
+  -H 'content-type: application/json' \
+  -d '{"name":"测试菜","price":10}'
+
+# 查看菜单项列表
+curl -sS http://localhost:3000/api/menu/items
+
+# 查看菜单与组局快照
+curl -sS http://localhost:3000/api/menu-session/snapshot
+```
+
+所有写入接口都会通过 zod schema 校验；无效输入返回 `400` 和统一结构化错误 JSON：`{ ok: false, error: { code, message, issues } }`。
 
 ## Learn More
 
