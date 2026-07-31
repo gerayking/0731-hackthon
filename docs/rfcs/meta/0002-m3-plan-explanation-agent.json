@@ -1,0 +1,73 @@
+{
+  "affects": "app/src/plan-explanation-agent; app/app/api/plans; app/src/contracts/snapshots.ts",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0002",
+  "status": "draft",
+  "tags": [
+    "m3",
+    "nac",
+    "agent",
+    "planning"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "pending",
+      "title": "定义公共 snapshot 契约"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T2",
+      "ref": null,
+      "status": "pending",
+      "title": "实现 M3 domain 类型和 fixture"
+    },
+    {
+      "depends_on": [
+        "T2"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "pending",
+      "title": "实现方案生成、解释、调整 service"
+    },
+    {
+      "depends_on": [
+        "T3"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "pending",
+      "title": "增加 /api/plans Route Handlers"
+    },
+    {
+      "depends_on": [
+        "T3"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "pending",
+      "title": "增加 M3 展示 UI 或 Demo 页面"
+    },
+    {
+      "depends_on": [
+        "T3",
+        "T4",
+        "T5"
+      ],
+      "id": "T6",
+      "ref": null,
+      "status": "pending",
+      "title": "增加 Vitest 测试和验证文档"
+    }
+  ],
+  "title": "M3 方案生成与解释 Agent 模块",
+  "updated": "2026-07-31"
+}
