@@ -1,7 +1,7 @@
 .PHONY: help install dev build start lint clean
 
 APP_DIR := app
-PACKAGE_MANAGER ?= npm
+PACKAGE_MANAGER ?= pnpm
 
 help: ## 查看可用命令
 	@printf "North Food 本地开发命令\n\n"
