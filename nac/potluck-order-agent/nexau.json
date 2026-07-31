@@ -1,0 +1,6 @@
+{
+  "agents": {
+    "potluck_order_agent": "agent.yaml"
+  },
+  "excluded": [".nexau/", ".env", "node_modules/", ".next/"]
+}

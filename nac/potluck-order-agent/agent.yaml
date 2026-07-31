@@ -1,0 +1,14 @@
+type: agent
+name: potluck_order_agent
+max_context_tokens: 200000
+system_prompt: ./system-prompt.md
+system_prompt_type: jinja
+tool_call_mode: structured
+max_iterations: 20
+llm_config:
+  max_tokens: 4096
+  temperature: 0.2
+tools: []
+skills: []
+stop_tools:
+  - complete_task
