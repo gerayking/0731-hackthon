@@ -1,0 +1,49 @@
+name: PR Gate
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  rc-number-and-conflict-gate:
+    name: RC number and merge conflict gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check RC number in PR title or body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title ?? "";
+            const body = context.payload.pull_request.body ?? "";
+            const rcPattern = /(?:^|\s)RC-\d+(?:\b|$)/;
+            const hasRcNumber = rcPattern.test(title) || rcPattern.test(body);
+
+            if (!hasRcNumber) {
+              core.setFailed("PR 标题或正文必须包含 RC 编号，格式为 RC-数字，例如 RC-123。");
+            }
+
+      - name: Check merge conflict
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+
+          gh pr view "$PR_NUMBER" --json headRefName,mergeable,baseRefName --jq 'select(.mergeable == "CONFLICTING") | [.baseRefName, .headRefName] | @tsv' > /tmp/conflicting-pr.tsv
+
+          if [ -s /tmp/conflicting-pr.tsv ]; then
+            echo "当前 PR 与 $BASE_REF 存在合并冲突，无法通过门禁。"
+            exit 1
+          fi
+
+          echo "当前 PR 未检测到合并冲突。"
