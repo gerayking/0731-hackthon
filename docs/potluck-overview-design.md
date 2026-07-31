@@ -1,33 +1,48 @@
-# Potluck 概要设计：低耦合三人并行开发方案
+# Potluck 概要设计：ABC 零依赖并行开发方案
 
 > 来源：飞书 PRD「Potluck 产品需求文档（PRD）—— 一桌人的点餐 Agent」第 5 章 6 个 Epic。  
-> 目标：在不破坏 Agent 边界的前提下，把 6 个 Epic 拆成可并行开发的低耦合模块，支撑 North Hackathon Topic B 的本地演示与 Vercel Preview。
+> 目标：把 6 个 Epic 拆成 A/B/C 三个可以当天同时开工、互不阻塞、最终可集成的工作包，支撑 North Hackathon Topic B 的本地演示与 Vercel Preview。
+
+## 0. 核心结论
+
+为了满足「ABC 并行干活，不能出现依赖」的要求，本方案不再按传统前后端或模块上下游拆任务，而是采用 **三个垂直工作包**：
+
+| 工作包 | 负责人 | 覆盖 Epic | 独立启动方式 | 最终集成方式 |
+|---|---|---|---|---|
+| A：菜单与组局工作台 | A | Epic 1 获取菜单、Epic 2 组局 | 使用本地 seed 菜单和 session fixture | 输出 JSON snapshot，供页面 wiring 展示 |
+| B：Agent 需求理解工作台 | B | Epic 3 表达需求 | 使用本地需求 fixture，不读取菜单/方案 | 输出 JSON snapshot，供页面 wiring 展示 |
+| C：方案计算与解释工作台 | C | Epic 4 生成方案、Epic 5 解释方案、Epic 6 调整方案 | 使用本地 planning fixture | 输出 Plan JSON，供页面 wiring 展示 |
+
+关键原则：
+
+1. **A/B/C 不互相 import 业务模块。**
+2. **A/B/C 不等待别人先实现类型或服务。**
+3. **每个人都有自己的本地 fixture 和测试数据。**
+4. **最终集成只通过 JSON snapshot 和页面 wiring 拼接，不要求业务模块互相耦合。**
+5. **Agent 仍然只输出结构化意图，不直接修改订单、库存、菜单或方案。**
+
+---
 
 ## 1. 总体原则
 
 ### 1.1 架构方向
 
-建议采用 **Next.js + TypeScript** 单体应用，但内部按领域拆成清晰模块：
+建议采用 **Next.js + TypeScript** 单体应用，但内部按工作包拆成三个互不阻塞的垂直区域：
 
 ```text
 app/
-  前端页面与 Route Handlers
+  页面与 Route Handlers
 
 src/
-  agent/              Agent 意图解析与结构化输出
-  domain/             纯业务规则、推荐、解释、调整
-  persistence/        本地状态/SQLite/Prisma 抽象
-  api/                API 边界与 zod 校验
-  ui/                 React 组件
+  workbench-menu-session/     A：菜单与组局工作台
+  workbench-agent-requirements/ B：Agent 需求理解工作台
+  workbench-plan/             C：方案计算与解释工作台
+
+shared/
+  snapshots/                  仅保存 JSON fixture 与契约样例，不作为业务依赖
 ```
 
-核心思想：
-
-1. **Agent 只负责理解自然语言，输出结构化意图 JSON。**
-2. **后端服务负责业务规则校验、推荐、库存、订单状态。**
-3. **前端只负责展示和交互，不直接修改业务状态。**
-4. **领域层尽量使用纯 TypeScript，可独立测试，方便三人并行。**
-5. **所有外部输入必须经过 `zod` 校验，Agent 输出必须有显式类型定义。**
+> 注意：`shared/snapshots` 只放 JSON fixture、契约样例、测试数据，不暴露业务服务接口。A/B/C 的业务代码不从对方模块导入实现。
 
 ### 1.2 Agent 行为边界
 
@@ -56,134 +71,329 @@ Agent 或前端基于结果生成用户可读回复
 - 跳过业务校验；
 - 把自然语言字符串当作唯一事实来源。
 
+### 1.3 零依赖并行原则
+
+A/B/C 三人并行时，必须遵守以下规则：
+
+| 规则 | 含义 |
+|---|---|
+| 不等待公共类型 | 每个人先在自己工作包内定义局部类型，后续通过 snapshot 对齐 |
+| 不跨工作包 import | A 不 import B/C，B 不 import A/C，C 不 import A/B |
+| 不共享运行时状态 | 每个人使用自己的本地 store / fixture / repository |
+| 不阻塞页面开发 | 每个工作包先渲染自己的区域，最终由页面 wiring 拼接 |
+| 不提前做全局集成 | 集成只在最后通过 JSON snapshot 和轻量 adapter 完成 |
+
 ---
 
 ## 2. 6 个 Epic 的职责拆分
 
-| Epic | 产品目标 | 建议模块 | 可独立程度 |
+| Epic | 产品目标 | 归属工作包 | 并行方式 |
 |---|---|---|---|
-| Epic 1：获取菜单 | 让系统知道菜单、价格、口味 | `menu` 领域 + 菜单管理 UI | 高 |
-| Epic 2：组局 | 设定预算、人数、成员 | `session` / `group` 领域 | 高 |
-| Epic 3：表达需求 | 成员用自然语言说忌口和偏好 | `agent intent` + `requirement` 领域 | 中 |
-| Epic 4：生成方案 | 基于菜单、预算、硬需求生成方案 | `recommendation` 领域 | 中 |
-| Epic 5：解释方案 | 说明为什么选、为什么排除、是否满足 | `explanation` 领域 | 高 |
-| Epic 6：调整方案 | 改口后重算，并展示差异 | `plan revision` 领域 | 中 |
+| Epic 1：获取菜单 | 让系统知道菜单、价格、口味 | A | A 使用 seed 菜单和本地菜单编辑器，不等待推荐算法 |
+| Epic 2：组局 | 设定预算、人数、成员 | A | A 使用本地 session 状态，不等待 Agent 解析 |
+| Epic 3：表达需求 | 成员用自然语言说忌口和偏好 | B | B 使用本地 requirement fixture，不等待菜单/方案 |
+| Epic 4：生成方案 | 基于菜单、预算、硬需求生成方案 | C | C 使用本地 planning fixture，不等待 A/B 页面 |
+| Epic 5：解释方案 | 说明为什么选、为什么排除、是否满足 | C | C 基于 Plan JSON 生成解释，不依赖 UI 状态 |
+| Epic 6：调整方案 | 改口后重算，并展示差异 | C | C 基于 Plan JSON diff，不依赖 A/B 模块 |
 
 ---
 
-## 3. 推荐三人分工
+## 3. ABC 三人并行分工
 
-### 成员 A：菜单与组局基础数据
+### 3.1 A：菜单与组局工作台
 
-负责：
+#### 负责范围
 
 - Epic 1：获取菜单；
 - Epic 2：组局；
-- 基础类型与本地状态；
+- 左侧菜单区；
+- 中间组局区；
+- 菜单 seed 数据；
+- 本地菜单与 session repository；
 - 菜单、成员、预算、人数的输入与编辑；
 - 菜单置信度与人工确认字段。
 
-建议产出：
+#### 建议产出
 
 ```text
-src/domain/menu
-src/domain/session
-src/features/menu
-src/features/session
+src/workbench-menu-session/domain/menu.ts
+src/workbench-menu-session/domain/session.ts
+src/workbench-menu-session/repository/memory-menu-repository.ts
+src/workbench-menu-session/repository/memory-session-repository.ts
+src/workbench-menu-session/api/menu-routes.ts
+src/workbench-menu-session/api/session-routes.ts
+src/workbench-menu-session/ui/menu-panel.tsx
+src/workbench-menu-session/ui/session-panel.tsx
+src/workbench-menu-session/fixtures/menu-seed.ts
+src/workbench-menu-session/fixtures/session-seed.ts
 ```
 
-### 成员 B：Agent 意图解析与需求建模
+#### 可独立验收
 
-负责：
+A 不需要 B/C 完成，只要满足：
+
+- 可以粘贴文本菜单并解析出结构化菜品；
+- 可以编辑菜名、价格、品类、辣度、食材；
+- 可以显示低置信度字段；
+- 可以设置预算、用餐人数、成员；
+- 可以导出当前菜单和组局状态的 JSON snapshot；
+- 页面左侧和中间区域可以独立展示。
+
+#### 不依赖
+
+- 不依赖 Agent 解析；
+- 不依赖推荐算法；
+- 不依赖方案解释；
+- 不读取 B/C 的业务模块。
+
+---
+
+### 3.2 B：Agent 需求理解工作台
+
+#### 负责范围
 
 - Epic 3：表达需求；
-- Agent 输出结构化 JSON；
+- AgentIntent schema；
 - zod 校验 Agent 输出；
 - 需求实体、硬软约束、撤销与覆盖关系；
-- 未理解需求显式展示。
+- 未理解需求显式展示；
+- 中间需求区；
+- 本地 requirement repository。
 
-建议产出：
+#### 建议产出
 
 ```text
-src/agent
-src/domain/requirements
-src/features/requirements
+src/workbench-agent-requirements/domain/agent-intent.ts
+src/workbench-agent-requirements/domain/requirements.ts
+src/workbench-agent-requirements/parser/requirement-parser.ts
+src/workbench-agent-requirements/repository/memory-requirement-repository.ts
+src/workbench-agent-requirements/api/requirement-routes.ts
+src/workbench-agent-requirements/ui/requirement-panel.tsx
+src/workbench-agent-requirements/fixtures/requirement-seed.ts
 ```
 
-### 成员 C：推荐、解释与调整
+#### 可独立验收
 
-负责：
+B 不需要 A/C 完成，只要满足：
+
+- 可以输入自然语言需求；
+- 可以输出结构化 AgentIntent JSON；
+- 可以解析排除食材、辣度上限、甜度上限、素食、偏好食材、不喜欢某道菜、饭量大小；
+- 可以展示原话到结构化需求的映射；
+- 可以展示未理解文本；
+- 可以撤销需求并保留历史；
+- 可以区分硬需求和软需求；
+- 页面中间需求区域可以独立展示。
+
+#### 不依赖
+
+- 不依赖菜单 UI；
+- 不依赖菜单解析；
+- 不依赖推荐算法；
+- 不依赖方案解释；
+- 不读取 A/C 的业务模块。
+
+> B 只需要把成员当作 `memberId: string`，不需要知道 A 的 `Member` 完整结构。
+
+---
+
+### 3.3 C：方案计算与解释工作台
+
+#### 负责范围
 
 - Epic 4：生成方案；
 - Epic 5：解释方案；
 - Epic 6：调整方案；
-- 推荐算法、冲突检测、方案差异；
-- 可解释推荐理由。
+- 推荐算法；
+- 冲突检测；
+- 解释生成；
+- 方案差异；
+- 右侧方案区；
+- 本地 planning fixture。
 
-建议产出：
+#### 建议产出
 
 ```text
-src/domain/recommendation
-src/domain/explanation
-src/domain/revision
-src/features/plan
+src/workbench-plan/domain/plan.ts
+src/workbench-plan/domain/planning-context.ts
+src/workbench-plan/service/generate-plan.ts
+src/workbench-plan/service/explain-plan.ts
+src/workbench-plan/service/revise-plan.ts
+src/workbench-plan/service/diff-plan.ts
+src/workbench-plan/api/plan-routes.ts
+src/workbench-plan/ui/plan-panel.tsx
+src/workbench-plan/fixtures/planning-seed.ts
+```
+
+#### 可独立验收
+
+C 不需要 A/B 完成，只要满足：
+
+- 可以使用本地 planning fixture 生成方案；
+- 所有菜品必须来自 fixture 中的菜单；
+- 不得违反 fixture 中的硬需求；
+- 不超预算；
+- 每人至少有一份能吃；
+- 可以生成每道菜的选择理由；
+- 可以生成需求满足状态；
+- 可以生成预算说明；
+- 可以生成冲突说明；
+- 可以生成方案调整 diff；
+- 页面右侧方案区域可以独立展示。
+
+#### 不依赖
+
+- 不依赖 A 的菜单模块实现；
+- 不依赖 A 的 session 模块实现；
+- 不依赖 B 的 parser 实现；
+- 不读取 A/B 的业务模块。
+
+> C 只依赖自己工作包内的 `PlanningContext` fixture。后续接入真实 A/B 状态时，只通过 JSON snapshot adapter 映射，不改变推荐核心逻辑。
+
+---
+
+## 4. 并行契约：只约定 JSON snapshot，不共享运行时模块
+
+为了避免 A/B/C 互相等待，本方案只约定 **JSON snapshot 格式**，不要求三人共享运行时类型或模块。
+
+### 4.1 A 输出的菜单 snapshot
+
+```json
+{
+  "menu": [
+    {
+      "id": "dish_001",
+      "name": "宫保鸡丁饭",
+      "price": 48,
+      "category": "主食",
+      "spiciness": "微辣",
+      "ingredients": ["鸡肉", "花生", "米饭"],
+      "containsPork": false,
+      "containsBeef": false,
+      "containsChicken": true,
+      "containsSeafood": false,
+      "containsPeanut": true,
+      "containsEgg": false,
+      "containsDairy": false,
+      "isVegetarian": false,
+      "suggestedServings": 1,
+      "confidence": 0.82,
+      "confirmedFields": ["name", "price"]
+    }
+  ]
+}
+```
+
+### 4.2 A 输出的组局 snapshot
+
+```json
+{
+  "session": {
+    "id": "session_demo",
+    "budget": 250,
+    "memberCount": 4,
+    "members": [
+      { "id": "member_a", "name": "A", "needsTakeout": false },
+      { "id": "member_b", "name": "B", "needsTakeout": false },
+      { "id": "member_c", "name": "C", "needsTakeout": false },
+      { "id": "member_d", "name": "D", "needsTakeout": true }
+    ],
+    "promotions": []
+  }
+}
+```
+
+### 4.3 B 输出的需求 snapshot
+
+```json
+{
+  "requirementsByMember": {
+    "member_a": [
+      {
+        "id": "req_001",
+        "type": "exclude_ingredient",
+        "value": "猪肉",
+        "hardness": "hard",
+        "sourceText": "不吃猪肉",
+        "status": "active"
+      }
+    ],
+    "member_b": [
+      {
+        "id": "req_002",
+        "type": "exclude_ingredient",
+        "value": "花生",
+        "hardness": "hard",
+        "sourceText": "花生过敏",
+        "status": "active"
+      }
+    ],
+    "member_c": [
+      {
+        "id": "req_003",
+        "type": "spiciness_upper_bound",
+        "value": "微辣",
+        "hardness": "soft",
+        "sourceText": "我可以吃微辣",
+        "status": "active"
+      }
+    ]
+  }
+}
+```
+
+### 4.4 C 使用的 planning context snapshot
+
+```json
+{
+  "context": {
+    "menu": [],
+    "session": {},
+    "requirementsByMember": {},
+    "strategy": "balanced"
+  }
+}
+```
+
+> C 在本地 fixture 中自己维护 `menu`、`session`、`requirementsByMember`。最终集成时，由页面 wiring 将 A/B 的 snapshot 填入 C 的 adapter。
+
+### 4.5 C 输出的 Plan snapshot
+
+```json
+{
+  "plan": {
+    "id": "plan_demo",
+    "items": [
+      {
+        "dishId": "dish_001",
+        "dishName": "宫保鸡丁饭",
+        "quantity": 2,
+        "unitPrice": 48,
+        "subtotal": 96,
+        "sharedBy": ["member_a", "member_c"]
+      }
+    ],
+    "totalPrice": 96,
+    "budget": 250,
+    "status": "valid"
+  },
+  "explanation": {
+    "selectedReasons": [],
+    "memberRequirementStatus": [],
+    "excludedItems": [],
+    "budget": {
+      "used": 96,
+      "budget": 250,
+      "percent": 38.4
+    },
+    "conflicts": []
+  }
+}
 ```
 
 ---
 
-## 4. 低耦合核心设计
-
-### 4.1 领域对象
-
-建议先统一这些核心类型：
-
-```ts
-MenuItem
-MenuSource
-Member
-Requirement
-RequirementRevision
-MealSession
-Plan
-PlanItem
-PlanExplanation
-AgentIntent
-```
-
-这些类型建议放在：
-
-```text
-src/domain/types.ts
-```
-
-或者按领域拆分：
-
-```text
-src/domain/menu/types.ts
-src/domain/session/types.ts
-src/domain/requirements/types.ts
-src/domain/recommendation/types.ts
-```
-
-### 4.2 AgentIntent 建议结构
-
-AgentIntent 建议至少包含：
-
-```ts
-type AgentIntent =
-  | { action: "list_menu" }
-  | { action: "create_menu"; items: MenuItemInput[] }
-  | { action: "create_session"; budget?: number; memberCount: number; members?: MemberInput[] }
-  | { action: "add_requirement"; memberId: string; text: string }
-  | { action: "revoke_requirement"; requirementId: string }
-  | { action: "recommend"; strategy?: "balanced" | "cheap" | "coverage" }
-  | { action: "explain_plan"; planId: string }
-  | { action: "revise_plan"; planId: string; changes: PlanChangeInput[] }
-```
-
----
-
-## 5. Epic 1：获取菜单
+## 5. A 工作包详细设计：菜单与组局
 
 ### 5.1 功能范围
 
@@ -192,18 +402,14 @@ type AgentIntent =
 - 自动推断品类、辣度、食材、是否素食、建议份数；
 - 人工编辑菜单字段；
 - 显示低置信度字段；
-- 手动添加/删除菜品。
+- 手动添加/删除菜品；
+- 设置总预算；
+- 设置用餐人数；
+- 添加成员；
+- 支持打包人员；
+- 支持满减或套餐价。
 
-### 5.2 建议接口
-
-```ts
-parseTextMenu(text: string): ParsedMenuResult
-upsertMenuItem(input: MenuItemInput): MenuItem
-deleteMenuItem(id: string): void
-confirmMenuItemField(id: string, field: keyof MenuItem): void
-```
-
-### 5.3 数据结构
+### 5.2 A 的局部类型
 
 ```ts
 type MenuItem = {
@@ -227,36 +433,6 @@ type MenuItem = {
 }
 ```
 
-### 5.4 低耦合要点
-
-菜单领域只输出结构化菜单，不关心预算、成员、方案。
-
----
-
-## 6. Epic 2：组局
-
-### 6.1 功能范围
-
-- 设置总预算；
-- 设置用餐人数；
-- 添加成员；
-- 成员可独立表达需求；
-- 支持打包人员；
-- 支持满减或套餐价。
-
-### 6.2 建议接口
-
-```ts
-createMealSession(input: MealSessionInput): MealSession
-updateBudget(sessionId: string, budget: number): MealSession
-updateMemberCount(sessionId: string, memberCount: number): MealSession
-addMember(sessionId: string, input: MemberInput): Member
-updateMember(sessionId: string, memberId: string, patch: Partial<Member>): Member
-setPromotion(sessionId: string, promotion: Promotion): MealSession
-```
-
-### 6.3 数据结构
-
 ```ts
 type MealSession = {
   id: string
@@ -267,15 +443,31 @@ type MealSession = {
 }
 ```
 
-### 6.4 低耦合要点
+### 5.3 A 的接口
 
-组局模块只维护“谁、多少人、多少钱”，不生成方案。
+```ts
+parseTextMenu(text: string): ParsedMenuResult
+upsertMenuItem(input: MenuItemInput): MenuItem
+deleteMenuItem(id: string): void
+confirmMenuItemField(id: string, field: keyof MenuItem): void
+
+createMealSession(input: MealSessionInput): MealSession
+updateBudget(sessionId: string, budget: number): MealSession
+updateMemberCount(sessionId: string, memberCount: number): MealSession
+addMember(sessionId: string, input: MemberInput): Member
+setPromotion(sessionId: string, promotion: Promotion): MealSession
+exportMenuSessionSnapshot(): MenuSessionSnapshot
+```
+
+### 5.4 A 的低耦合要点
+
+A 只维护“菜单是什么、这桌有多少人、预算是多少”。A 不判断方案是否合理，不调用推荐服务，不解析自然语言需求。
 
 ---
 
-## 7. Epic 3：表达需求
+## 6. B 工作包详细设计：Agent 需求理解
 
-### 7.1 功能范围
+### 6.1 功能范围
 
 - 成员用自然语言说需求；
 - Agent 解析成结构化需求；
@@ -284,12 +476,12 @@ type MealSession = {
 - 支持追加、撤销、覆盖；
 - 区分硬需求和软需求。
 
-### 7.2 Agent 输出示例
+### 6.2 Agent 输出示例
 
 ```json
 {
   "action": "add_requirement",
-  "memberId": "member_1",
+  "memberId": "member_a",
   "text": "我可以吃微辣，但不吃猪肉",
   "requirements": [
     {
@@ -309,12 +501,12 @@ type MealSession = {
 }
 ```
 
-### 7.3 需求类型
+### 6.3 B 的需求类型
 
 ```ts
 type Requirement =
   | { type: "exclude_ingredient"; value: string; hardness: "hard" | "soft" }
-  | { type: "spiciness_upper_bound"; value: SpicinessLevel; hardness: "hard" | "soft" }
+  | { type: "spiciness_upper_bound"; value: "无辣" | "微辣" | "中辣" | "重辣"; hardness: "hard" | "soft" }
   | { type: "sweetness_upper_bound"; value: string; hardness: "hard" | "soft" }
   | { type: "vegetarian"; value: true; hardness: "hard" | "soft" }
   | { type: "prefer_ingredient"; value: string; hardness: "soft" }
@@ -322,15 +514,25 @@ type Requirement =
   | { type: "appetite"; value: "small" | "normal" | "large" }
 ```
 
-### 7.4 低耦合要点
+### 6.4 B 的接口
 
-需求模块只负责把自然语言转成结构化约束，不负责推荐。
+```ts
+parseRequirementText(input: RequirementInput): RequirementParseResult
+addRequirement(input: RequirementInput): Requirement[]
+revokeRequirement(requirementId: string): Requirement[]
+overrideRequirement(input: OverrideRequirementInput): Requirement[]
+exportRequirementsSnapshot(): RequirementsSnapshot
+```
+
+### 6.5 B 的低耦合要点
+
+B 只维护“用户说了什么、系统理解成什么、哪些没理解、哪些被撤销”。B 不负责菜单识别，不负责推荐，不负责方案解释。
 
 ---
 
-## 8. Epic 4：生成方案
+## 7. C 工作包详细设计：方案计算与解释
 
-### 8.1 功能范围
+### 7.1 功能范围
 
 - 基于菜单、成员、需求、预算生成方案；
 - 所有菜品必须来自当前菜单；
@@ -338,19 +540,30 @@ type Requirement =
 - 每人至少有一份能吃；
 - 不超预算；
 - 菜品搭配尽量均衡；
-- 支持多人份共享菜。
+- 支持多人份共享菜；
+- 每道菜为什么被选中；
+- 哪些菜为什么被排除；
+- 每个成员需求是否满足；
+- 预算使用情况；
+- 无法两全时明确说明冲突；
+- 需求变化后重算；
+- 菜单变化后重算；
+- 预算或人数变化后重算；
+- 展示新增、移除、份数变化；
+- 支持手动移除某道菜并补菜；
+- 支持锁定某道菜。
 
-### 8.2 输入输出
+### 7.2 C 的输入输出
 
 ```ts
 generatePlan(input: GeneratePlanInput): PlanResult
+explainPlan(input: ExplainPlanInput): PlanExplanation
+revisePlan(input: RevisePlanInput): RevisionResult
 ```
 
 ```ts
 type GeneratePlanInput = {
-  sessionId: string
-  menu: MenuItem[]
-  requirementsByMember: Record<string, Requirement[]>
+  context: PlanningContext
   strategy?: "balanced" | "cheap" | "coverage"
 }
 ```
@@ -361,7 +574,7 @@ type PlanResult =
   | { ok: false; conflicts: Conflict[]; suggestions: string[] }
 ```
 
-### 8.3 推荐优先级
+### 7.3 推荐优先级
 
 建议按以下顺序判断：
 
@@ -374,29 +587,7 @@ type PlanResult =
 6. 多样性
 ```
 
-### 8.4 低耦合要点
-
-推荐模块只接收纯数据，不依赖 UI、不依赖 Agent。
-
----
-
-## 9. Epic 5：解释方案
-
-### 9.1 功能范围
-
-- 每道菜为什么被选中；
-- 哪些菜为什么被排除；
-- 每个成员需求是否满足；
-- 预算使用情况；
-- 无法两全时明确说明冲突。
-
-### 9.2 建议接口
-
-```ts
-explainPlan(input: ExplainPlanInput): PlanExplanation
-```
-
-### 9.3 解释结构
+### 7.4 解释结构
 
 ```ts
 type PlanExplanation = {
@@ -408,31 +599,7 @@ type PlanExplanation = {
 }
 ```
 
-### 9.4 低耦合要点
-
-解释模块依赖 `Plan` 和 `Requirement`，但不修改它们。
-
----
-
-## 10. Epic 6：调整方案
-
-### 10.1 功能范围
-
-- 需求变化后重算；
-- 菜单变化后重算；
-- 预算或人数变化后重算；
-- 保留旧方案；
-- 展示新增、移除、份数变化；
-- 支持手动移除某道菜并补菜；
-- 支持锁定某道菜。
-
-### 10.2 建议接口
-
-```ts
-revisePlan(input: RevisePlanInput): RevisionResult
-```
-
-### 10.3 差异结构
+### 7.5 差异结构
 
 ```ts
 type PlanDiff = {
@@ -443,134 +610,84 @@ type PlanDiff = {
 }
 ```
 
-### 10.4 低耦合要点
+### 7.6 C 的低耦合要点
 
-调整模块调用推荐和解释模块，不自己重新实现规则。
-
----
-
-## 11. 数据流设计
-
-```text
-菜单录入
-  → MenuRepository
-
-组局配置
-  → SessionRepository
-
-自然语言需求
-  → AgentIntentParser
-  → zod validate
-  → RequirementRepository
-
-菜单 + 组局 + 需求
-  → RecommendationService
-  → PlanRepository
-
-Plan
-  → ExplanationService
-  → ExplanationView
-
-Plan + 新输入
-  → RevisionService
-  → PlanDiff
-```
+C 只接收 `PlanningContext` 或本地 fixture，不读取 A/B 的实现。C 的核心推荐、解释、diff 逻辑都保持纯函数，便于独立测试。
 
 ---
 
-## 12. 存储建议
+## 8. API 设计
 
-为了 Demo 和 Vercel 预览稳定，建议优先使用：
+建议 Route Handlers 按工作包拆分：
 
-### 方案 A：SQLite + Prisma
-
-优点：
-
-- 真实后端状态；
-- 本地可运行；
-- Vercel 预览可用；
-- 适合订单、菜单、需求持久化。
-
-缺点：
-
-- 需要配置 Prisma schema。
-
-### 方案 B：内存状态 + 本地 JSON seed
-
-优点：
-
-- 最快实现；
-- 适合 Hackathon Demo；
-- 耦合低。
-
-缺点：
-
-- 刷新丢失；
-- 不够“真实后端”。
-
-### 推荐
-
-如果时间紧：  
-**先用内存状态 + seed 数据，接口保持 Repository 抽象，后续可替换为 SQLite。**
-
----
-
-## 13. API 设计
-
-建议 Route Handlers：
+### 8.1 A：菜单与组局 API
 
 ```text
 POST /api/menu/parse
 POST /api/menu/items
 PATCH /api/menu/items/:id
 DELETE /api/menu/items/:id
+GET /api/menu-session/snapshot
+```
 
-POST /api/session
-PATCH /api/session/:id
-POST /api/session/:id/members
+### 8.2 B：需求 API
 
+```text
+POST /api/agent/parse
 POST /api/requirements
+PATCH /api/requirements/:id
 DELETE /api/requirements/:id
+GET /api/requirements/snapshot
+```
 
-POST /api/plans
+### 8.3 C：方案 API
+
+```text
+POST /api/plans/generate
 GET /api/plans/:id
+POST /api/plans/:id/explain
 POST /api/plans/:id/revise
-
-GET /api/plans/:id/explanation
+POST /api/plans/:id/diff
 ```
 
 所有外部输入必须用 `zod` 校验。
 
 ---
 
-## 14. 前端页面结构
+## 9. 前端页面结构
 
-建议一个主页面即可：
+建议一个主页面即可，但三个区域由 A/B/C 分别实现：
 
 ```text
 /
-  左侧：菜单区
-  中间：成员与需求区
-  右侧：方案与解释区
+  左侧：A 菜单区
+  中间：A 组局区 + B 需求区
+  右侧：C 方案与解释区
 ```
 
-### 14.1 左侧：菜单
+### 9.1 左侧：菜单区（A）
 
 - 粘贴菜单；
 - 编辑菜品；
 - 显示置信度；
 - 删除/新增菜品。
 
-### 14.2 中间：成员与需求
+### 9.2 中间：组局区（A）
 
 - 设置预算、人数；
 - 添加成员；
+- 标记打包人员；
+- 设置满减或套餐价。
+
+### 9.3 中间：需求区（B）
+
 - 输入自然语言需求；
 - 展示结构化需求；
 - 展示未理解文本；
-- 撤销需求。
+- 撤销需求；
+- 显示硬/软需求区分。
 
-### 14.3 右侧：方案
+### 9.4 右侧：方案区（C）
 
 - 生成方案；
 - 展示菜品、份数、总价；
@@ -580,152 +697,245 @@ GET /api/plans/:id/explanation
 
 ---
 
-## 15. 并行开发边界
+## 10. 并行开发边界
 
-### 15.1 成员 A 可以独立做
+### 10.1 A 可以独立做
 
 - 菜单录入；
 - 菜单编辑；
 - 菜单置信度；
 - 组局配置；
 - 成员管理；
-- 预算、人数、优惠。
+- 预算、人数、优惠；
+- 左侧和中间组局 UI；
+- 菜单/session snapshot 导出。
 
-不依赖：
+A 不需要等 B/C。
 
-- Agent；
-- 推荐算法；
-- 方案解释。
-
-### 15.2 成员 B 可以独立做
+### 10.2 B 可以独立做
 
 - AgentIntent schema；
 - 需求解析；
 - 需求存储；
 - 原话映射；
 - 未理解项展示；
-- 撤销/覆盖逻辑。
+- 撤销/覆盖逻辑；
+- 需求区 UI；
+- requirement snapshot 导出。
 
-不依赖：
+B 不需要等 A/C。
 
-- 菜单 UI；
-- 推荐算法；
-- 方案解释。
-
-### 15.3 成员 C 可以独立做
+### 10.3 C 可以独立做
 
 - 推荐算法；
 - 冲突检测；
 - 解释生成；
 - 方案差异；
-- 调整方案。
+- 调整方案；
+- 右侧方案 UI；
+- planning fixture；
+- plan snapshot 输出。
 
-依赖：
-
-- 菜单数据结构；
-- 成员数据结构；
-- 需求数据结构。
-
-因此建议成员 A 和 B 先定类型，成员 C 等类型稳定后接入。
+C 不需要等 A/B。
 
 ---
 
-## 16. 建议开发顺序
+## 11. 并行开发顺序
 
-### 16.1 第一阶段：基础闭环
+### 11.1 第一天：三条线同时开工
 
-1. 菜单数据结构；
-2. 组局数据结构；
-3. 需求数据结构；
-4. AgentIntent schema；
-5. 简单内存 Repository；
-6. 前端三栏布局。
+A 做：
 
-### 16.2 第二阶段：核心能力
+1. menu seed；
+2. session seed；
+3. 菜单编辑 UI；
+4. 组局 UI；
+5. snapshot 导出。
 
-1. 文本菜单解析；
-2. 自然语言需求解析；
-3. 推荐生成；
-4. 方案解释；
-5. 方案调整差异。
+B 做：
 
-### 16.3 第三阶段：体验增强
+1. AgentIntent schema；
+2. requirement seed；
+3. 需求输入 UI；
+4. 原话映射 UI；
+5. snapshot 导出。
 
-1. 置信度提示；
-2. 撤销需求；
-3. 冲突说明；
-4. 预算进度；
-5. 方案对比。
+C 做：
+
+1. planning seed；
+2. generatePlan 纯函数；
+3. plan UI；
+4. explainPlan 纯函数；
+5. plan snapshot 输出。
+
+### 11.2 第二天：各自补齐核心验收
+
+A 补齐：
+
+- 文本菜单解析；
+- 低置信度提示；
+- 人工确认字段；
+- 预算和人数校验。
+
+B 补齐：
+
+- 多句需求解析；
+- 未理解文本；
+- 撤销需求；
+- 硬软需求视觉区分。
+
+C 补齐：
+
+- 硬需求过滤；
+- 预算过滤；
+- 分类均衡；
+- 冲突说明；
+- 方案 diff。
+
+### 11.3 最后集成：只做 wiring，不改核心逻辑
+
+最后只需要把三个 snapshot 接到主页面：
+
+```text
+A snapshot: menu + session
+B snapshot: requirementsByMember
+C adapter: menu + session + requirementsByMember -> PlanningContext
+C output: plan + explanation + diff
+```
+
+> 集成工作不要求 A/B/C 互相改业务模块，只负责把 JSON 数据串起来。
 
 ---
 
-## 17. 最小可演示路径
+## 12. 最小可演示路径
 
 Demo 可以固定为：
 
-1. 粘贴菜单；
-2. 设置预算 250、4 人；
-3. 添加成员 A/B/C/D；
-4. A 说“不吃猪肉”；
-5. B 说“花生过敏”；
-6. C 说“想吃辣一点”；
-7. Agent 解析需求；
-8. 生成方案；
-9. 展示解释；
-10. B 改口说“花生可以吃一点”；
-11. 重算并展示差异；
-12. 手动移除一道菜，系统补菜；
-13. 展示预算使用率。
+1. A 粘贴菜单；
+2. A 设置预算 250、4 人；
+3. A 添加成员 A/B/C/D；
+4. B 输入 A 的需求：“不吃猪肉”；
+5. B 输入 B 的需求：“花生过敏”；
+6. B 输入 C 的需求：“想吃辣一点”；
+7. B 展示结构化需求；
+8. C 生成方案；
+9. C 展示解释；
+10. B 让 B 改口：“花生可以吃一点”；
+11. C 重算并展示差异；
+12. C 手动移除一道菜，系统补菜；
+13. C 展示预算使用率。
 
 ---
 
-## 18. 风险与取舍
+## 13. 每个工作包的 Definition of Done
 
-### 18.1 风险：Agent 解析不稳定
+### 13.1 A 的 DoD
+
+- 菜单 seed 可展示；
+- 文本菜单可解析；
+- 菜品字段可编辑；
+- 低置信度字段可提示；
+- 预算、人数、成员可配置；
+- 菜单/session snapshot 可导出；
+- A 相关测试通过；
+- A 不 import B/C 业务模块。
+
+### 13.2 B 的 DoD
+
+- AgentIntent schema 已定义；
+- 自然语言需求可解析；
+- 原话到需求映射可展示；
+- 未理解文本可展示；
+- 撤销需求可保留历史；
+- 硬软需求可区分；
+- requirement snapshot 可导出；
+- B 相关测试通过；
+- B 不 import A/C 业务模块。
+
+### 13.3 C 的 DoD
+
+- planning seed 可生成方案；
+- 不违反硬需求；
+- 不超预算；
+- 每人至少有一份能吃；
+- 可生成选择理由；
+- 可生成需求满足状态；
+- 可生成冲突说明；
+- 可生成方案 diff；
+- C 相关测试通过；
+- C 不 import A/B 业务模块。
+
+---
+
+## 14. 风险与取舍
+
+### 14.1 风险：snapshot 字段漂移
+
+建议：
+
+- 每个工作包都维护 fixture；
+- 每个工作包都导出 snapshot；
+- 最后集成时只做字段映射；
+- 不要求 A/B/C 在开发过程中共享运行时类型。
+
+### 14.2 风险：Agent 解析不稳定
 
 建议：
 
 - 使用固定 schema；
 - 对无法解析的部分显式返回 unresolvedTexts；
-- 不做过度自由发挥。
+- 不做过度自由发挥；
+- B 可以独立用 fixture 演示解析结果。
 
-### 18.2 风险：推荐算法复杂
+### 14.3 风险：推荐算法复杂
 
 建议：
 
 - V1 用贪心 + 规则过滤；
 - 不追求全局最优；
-- 重点是可解释、不违反硬约束、不超预算。
+- 重点是可解释、不违反硬约束、不超预算；
+- C 可以独立用 planning fixture 演示推荐结果。
 
-### 18.3 风险：多人并行冲突
+### 14.4 风险：多人并行冲突
 
 建议：
 
-- 先定类型；
-- 再分模块实现；
-- 所有业务逻辑通过服务函数调用，不直接跨模块改状态。
+- 明确禁止跨工作包 import；
+- 每人只改自己的工作包；
+- 最后只做页面 wiring；
+- 不提前重构公共模块。
 
 ---
 
-## 19. 最终建议
+## 15. 最终建议
 
-如果 3 个人要快速并行，建议采用：
-
-```text
-成员 A：菜单 + 组局
-成员 B：Agent + 需求
-成员 C：推荐 + 解释 + 调整
-```
-
-并且先统一：
+如果 3 个人要零依赖并行，建议采用：
 
 ```text
-MenuItem
-Member
-Requirement
-MealSession
-Plan
-AgentIntent
+A：菜单 + 组局工作台
+B：Agent + 需求工作台
+C：方案 + 解释 + 调整工作台
 ```
 
-这样耦合最低，也最符合 PRD 对 Agent 边界的要求。
+并且每个人各自维护：
+
+```text
+domain
+repository
+api
+ui
+fixtures
+tests
+snapshot
+```
+
+最终通过 JSON snapshot 集成：
+
+```text
+A snapshot: menu + session
+B snapshot: requirementsByMember
+C adapter: PlanningContext
+C output: plan + explanation + diff
+```
+
+这样 A/B/C 可以当天同时开工，不需要等待公共类型、公共服务或公共页面完成，也最符合 PRD 对 Agent 边界的要求。
