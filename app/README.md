@@ -86,6 +86,37 @@ curl -X POST http://localhost:3000/api/plans/revise \
   -d '{"previousPlan": <上一个 plan>, "currentContext": <PlanningInputSnapshot>, "requestedChanges": [{"type": "remove_item", "dishId": "dish_001"}]}'
 ```
 
+## M1 菜单与组局模块
+
+M1 维护真实可用的菜单与组局状态，并向 M3 输出 `MenuSessionSnapshot`。详见 RFC-0006（`docs/rfcs/0006-m1-menu-session.md`）。
+
+### 功能入口
+
+- M1 Demo 页面：<http://localhost:3000/menu-session>
+- 菜单 CRUD：`GET/POST /api/menu/items`、`PATCH/DELETE /api/menu/items/[id]`
+- 组局 CRUD：`GET/POST /api/session`、`PATCH/DELETE /api/session/[id]`
+- 候选逐项确认：`POST /api/menu/candidates/confirm`
+- 快照输出：`GET /api/menu-session/snapshot`
+
+### API 示例
+
+```bash
+# 创建菜单项
+curl -sS http://localhost:3000/api/menu/items \
+  -H 'content-type: application/json' \
+  -d '{"name":"测试菜","price":10}'
+
+# 查看菜单项列表
+curl -sS http://localhost:3000/api/menu/items
+
+# 查看菜单与组局快照
+curl -sS http://localhost:3000/api/menu-session/snapshot
+```
+
+所有写入接口都会通过 zod schema 校验；无效输入返回 `400` 和统一结构化错误 JSON：`{ ok: false, error: { code, message, issues } }`。
+
+M1 使用 `drizzle-orm` + `better-sqlite3` 持久化到 `app/.data/potluck.sqlite`，该目录已在 `.gitignore` 中忽略。
+
 ## 用户系统 SQLite 持久化
 
 用户系统使用 SQLite 保存 Demo 所需的数据结构，当前 T2 初始化以下表：

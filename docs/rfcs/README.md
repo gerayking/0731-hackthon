@@ -7,3 +7,4 @@
 | 0002 | M3 方案生成与解释 Agent 模块 | Implemented | P1 | m3,nac,agent,planning | app/src/plan-explanation-agent; app/app/api/plans; app/src/contracts/snapshots.ts |
 | [RFC-0001](./0001-user-system.md) | 用户系统 | draft | P1 | user-system, auth, demo, sqlite | app/app, app/package.json, app/tsconfig.json, app/README.md, docs/rfcs |
 | [RFC-0003](./0003-m2-ocr-requirement-agent.md) | M2 OCR 与用户需求 Agent 模块任务拆解 | draft | P1 | m2,ocr,agent,requirements | src/ocr-requirement-agent; app/api/ocr; app/api/requirements |
+| [RFC-0006](./0006-m1-menu-session.md) | M1 菜单与组局模块实现 | draft | P1 | m1,menu,session,sqlite,mock | app/src/menu-session, app/app/api, app/app/page.tsx, app/components, app/README.md, app/package.json, app/tsconfig.json |

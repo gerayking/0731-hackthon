@@ -1,0 +1,75 @@
+{
+  "affects": "app/src/menu-session, app/app/api, app/app/page.tsx, app/components, app/README.md, app/package.json, app/tsconfig.json",
+  "created": "2026-07-31",
+  "priority": "P1",
+  "related": [],
+  "requires": [],
+  "rfc": "0006",
+  "status": "implementing",
+  "tags": [
+    "m1",
+    "menu",
+    "session",
+    "sqlite",
+    "mock"
+  ],
+  "tasks": [
+    {
+      "depends_on": [],
+      "id": "T1",
+      "ref": null,
+      "status": "implemented",
+      "title": "建立 M1 领域模型、zod schema 与 SQLite schema"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T2",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现菜单、组局与 snapshot 服务层"
+    },
+    {
+      "depends_on": [
+        "T2"
+      ],
+      "id": "T3",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现 M1 Route Handlers API"
+    },
+    {
+      "depends_on": [
+        "T1"
+      ],
+      "id": "T4",
+      "ref": null,
+      "status": "implemented",
+      "title": "实现 M1 菜单与组局 UI"
+    },
+    {
+      "depends_on": [
+        "T4"
+      ],
+      "id": "T5",
+      "ref": null,
+      "status": "in-progress",
+      "title": "实现候选确认与本地 mock M2/M3 面板"
+    },
+    {
+      "depends_on": [
+        "T2",
+        "T3",
+        "T4",
+        "T5"
+      ],
+      "id": "T6",
+      "ref": null,
+      "status": "pending",
+      "title": "补充测试、README 与质量门禁验证"
+    }
+  ],
+  "title": "M1 菜单与组局模块实现",
+  "updated": "2026-07-31"
+}
