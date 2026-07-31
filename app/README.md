@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 点餐系统 App
 
-## Getting Started
+本目录是点餐系统的 Next.js + TypeScript 前端应用。当前 RFC-0001「用户系统」正在按子任务推进，T2 已提供本地 SQLite 持久化与迁移能力。
 
-First, run the development server:
+## 本地启动
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+pnpm migrate:user-system
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+启动后访问：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 本地开发：<http://localhost:3000>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 用户系统 SQLite 持久化
 
-## Learn More
+用户系统使用 SQLite 保存 Demo 所需的数据结构，当前 T2 初始化以下表：
 
-To learn more about Next.js, take a look at the following resources:
+- `users`：用户主体、角色、昵称、忌口、预算提示、备注与时间戳；
+- `demo_user_sessions`：Demo 身份切换会话；
+- `schema_migrations`：迁移记录。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+迁移脚本位于 `app/scripts/migrate-user-system.ts`，通过 TypeScript 运行，不生成 `.js` 或 `.py` 文件。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm migrate:user-system
+```
 
-## Deploy on Vercel
+默认数据库文件：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+app/.data/user-system.sqlite
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+如需覆盖数据库路径，可设置环境变量：
+
+```bash
+USER_SYSTEM_DB_PATH=/tmp/demo-user-system.sqlite pnpm migrate:user-system
+```
+
+`.data/` 已加入 `.gitignore`，本地 Demo 数据不会被提交。
+
+## 常用命令
+
+```bash
+pnpm dev
+pnpm build
+pnpm lint
+pnpm exec tsc --noEmit
+pnpm migrate:user-system
+```
+
+## Vercel 分支预览
+
+项目可部署到 Vercel。连接 GitHub 仓库后，每个功能分支的 Pull Request 会生成 Preview URL。PR 页面应记录最新 Preview URL，并在 Demo 前确认可访问。
+
+生产密钥只允许放在 Vercel 环境变量中，不提交到仓库。
