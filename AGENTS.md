@@ -320,7 +320,38 @@ CI 必须检查禁止文件：
 }
 ```
 
-## 13. 环境变量规则
+## 13. NAC / NexAU 使用 Skill
+
+如果后续需要接入 North Agent Cloud 或 NexAU 能力，必须先读取仓库内 skill：
+
+- `.agents/skills/nac/SKILL.md`
+
+该文件是本项目内维护的 NAC / NexAU 使用说明，覆盖：
+
+- CLI 版本检查；
+- PAT 与 AK:SK 认证区别；
+- 项目、版本、环境、临时 lane 管理；
+- 环境变量管理；
+- LLM 配置；
+- 日志、trace、会话查看；
+- `nac chat` / `nac smoke` / `nac test` / `nac bench`；
+- `agent.yaml`、`nexau.json`、`VERSION`、`nac-tests.yaml` 规范；
+- 本项目接入 NAC 的最小验收标准。
+
+公开参考资料：
+
+- NAC SDK：<https://github.com/china-qijizhifeng/nac-sdk>
+- NAC/NexAU Cookbook：<https://github.com/hzhua/nexau-cookbook>
+- nexau artifact-builder skill：<https://github.com/china-qijizhifeng/nexau-public-skills>
+
+使用这些资料时仍需遵守本项目规则：
+
+- 不得引入破坏 Vercel 部署的依赖；
+- 不得提交真实密钥；
+- 不得绕过 Agent 边界直接修改业务状态；
+- 如果资料中的示例包含 Python/JavaScript 脚本，只能参考思路，不能直接手写 `.py` / `.js` 文件进入仓库。
+
+## 14. 环境变量规则
 
 允许提交：
 
@@ -338,7 +369,7 @@ CI 必须检查禁止文件：
 
 `.env.local` 必须加入 `.gitignore`。
 
-## 14. 文档规则
+## 15. 文档规则
 
 必须维护：
 
@@ -350,7 +381,7 @@ CI 必须检查禁止文件：
 
 文档必须用简体中文，除非是代码、路径、命令、API 名称。
 
-## 15. Demo 规则
+## 16. Demo 规则
 
 Demo 必须固定脚本，禁止临场发挥。
 
@@ -365,7 +396,7 @@ Demo 必须固定脚本，禁止临场发挥。
 7. 取消订单并恢复库存；
 8. 展示 Vercel Preview。
 
-## 16. Definition of Done
+## 17. Definition of Done
 
 一个功能只有满足以下条件才算完成：
 
@@ -381,7 +412,7 @@ Demo 必须固定脚本，禁止临场发挥。
 - 没有 `.js` / `.py` 手写文件；
 - 至少一名队友 Review 通过。
 
-## 17. 提交冻结规则
+## 18. 提交冻结规则
 
 截止前 30 分钟进入冻结期。
 
@@ -402,7 +433,7 @@ Demo 必须固定脚本，禁止临场发挥。
 - 修改数据库方案；
 - 临时写 Python/JS 脚本。
 
-## 18. Agent 修改代码前必须检查
+## 19. Agent 修改代码前必须检查
 
 每次修改代码前，Agent 必须先确认：
 
