@@ -41,10 +41,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          gh pr view "$PR_NUMBER" --repo "$GH_REPOSITORY" --json headRefName,mergeable,baseRefName --jq 'select(.mergeable == "CONFLICTING") | [.baseRefName, .headRefName] | @tsv' > /tmp/conflicting-pr.tsv
+          mergeable=$(gh api "/repos/${GH_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.mergeable')
 
-          if [ -s /tmp/conflicting-pr.tsv ]; then
+          if [ "$mergeable" = "false" ]; then
             echo "当前 PR 与 $BASE_REF 存在合并冲突，无法通过门禁。"
+            exit 1
+          fi
+
+          if [ "$mergeable" = "null" ]; then
+            echo "GitHub 尚未计算出 mergeable 状态，当前 PR 未通过合并冲突门禁。"
             exit 1
           fi
 
