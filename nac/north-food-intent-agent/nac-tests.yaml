@@ -1,0 +1,13 @@
+tests:
+  - name: "recommend-intent-smoke"
+    message: "我们 4 个人，预算 300，不吃辣，有人不吃猪肉，想有荤有素，别点重复的。"
+    assert:
+      status: completed
+      latency_ms: "< 10000"
+      content_contains: '"intent": "recommend"'
+  - name: "clarification-smoke"
+    message: "帮我点几个菜吧。"
+    assert:
+      status: completed
+      latency_ms: "< 10000"
+      content_contains: '"needs_clarification": true'

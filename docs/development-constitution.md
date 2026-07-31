@@ -1,10 +1,10 @@
-# 开发宪法：North Hackathon Topic B 点餐系统
+# 开发宪法：North Food
 
 > 本文档是本项目研发阶段的最高开发规则。所有 RFC、PR、代码和 Demo 都必须遵守本文档；如需修改，必须通过团队共识并更新本文档。
 
 ## 1. 项目目标
 
-本项目参加 North Hackathon Topic B：**Agent 驱动点餐系统**。
+本项目参加 North Hackathon Topic B：**North Food（Agent 驱动点餐系统）**。
 
 最终交付必须满足：
 
@@ -233,6 +233,13 @@ chore(vercel): add preview deployment config
 7. 通过 CI 检查；
 8. 至少一名队友 Review 后合并。
 
+PR 还必须通过 `.github/workflows/pr-gate.yml` 中的基础门禁：
+
+- PR 标题或正文至少包含一个发布候选编号，格式为 `RC-数字`，例如 `RC-123`；
+- `docs/rfcs/` 下的 RFC Markdown 与 meta JSON 文件名必须使用 `NNNN-slug` 格式，且同一类文件内编号不重复；
+- PR 与目标分支不能存在合并冲突；
+- 门禁失败时不会自动评论，需查看 GitHub Actions 状态和日志修复。
+
 PR 模板：
 
 ```md
@@ -402,7 +409,7 @@ Demo 数据必须随仓库提交。
 
 提交前必须确认：
 
-- [ ] 已选择 Topic B：点餐系统；
+- [ ] 已选择 Topic B：North Food（Agent 驱动点餐系统）；
 - [ ] 仓库为 Public；
 - [ ] `docs/development-constitution.md` 已提交；
 - [ ] `docs/rfcs/` 下至少有一份 RFC；

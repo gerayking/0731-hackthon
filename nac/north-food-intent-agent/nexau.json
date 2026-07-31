@@ -1,0 +1,6 @@
+{
+  "agents": {
+    "north_food_intent_agent": "agent.yaml"
+  },
+  "excluded": [".nexau/", ".env", "node_modules/", ".next/"]
+}

@@ -1,10 +1,10 @@
 # AGENTS.md
 
-这是 North Hackathon Topic B「Agent 驱动点餐系统」的仓库级 Agent 指令。所有参与本项目的 AI Agent 都必须遵守。
+这是 North Food（North Hackathon Topic B「Agent 驱动点餐系统」）的仓库级 Agent 指令。所有参与本项目的 AI Agent 都必须遵守。
 
 ## 1. 最高目标
 
-本项目参加 North Hackathon Topic B：**点餐系统**。
+本项目参加 North Hackathon Topic B：**North Food（Agent 驱动点餐系统）**。
 
 最终交付必须是一个可本地运行、可 Vercel 分支预览部署、Agent 真正参与核心业务流程的 TypeScript/Rust 项目。
 
@@ -320,7 +320,38 @@ CI 必须检查禁止文件：
 }
 ```
 
-## 13. 环境变量规则
+## 13. NAC / NexAU 使用 Skill
+
+如果后续需要接入 North Agent Cloud 或 NexAU 能力，必须先读取仓库内 skill：
+
+- `.agents/skills/nac/SKILL.md`
+
+该文件是本项目内维护的 NAC / NexAU 使用说明，覆盖：
+
+- CLI 版本检查；
+- PAT 与 AK:SK 认证区别；
+- 项目、版本、环境、临时 lane 管理；
+- 环境变量管理；
+- LLM 配置；
+- 日志、trace、会话查看；
+- `nac chat` / `nac smoke` / `nac test` / `nac bench`；
+- `agent.yaml`、`nexau.json`、`VERSION`、`nac-tests.yaml` 规范；
+- 本项目接入 NAC 的最小验收标准。
+
+公开参考资料：
+
+- NAC SDK：<https://github.com/china-qijizhifeng/nac-sdk>
+- NAC/NexAU Cookbook：<https://github.com/hzhua/nexau-cookbook>
+- nexau artifact-builder skill：<https://github.com/china-qijizhifeng/nexau-public-skills>
+
+使用这些资料时仍需遵守本项目规则：
+
+- 不得引入破坏 Vercel 部署的依赖；
+- 不得提交真实密钥；
+- 不得绕过 Agent 边界直接修改业务状态；
+- 如果资料中的示例包含 Python/JavaScript 脚本，只能参考思路，不能直接手写 `.py` / `.js` 文件进入仓库。
+
+## 14. 环境变量规则
 
 允许提交：
 
@@ -338,7 +369,7 @@ CI 必须检查禁止文件：
 
 `.env.local` 必须加入 `.gitignore`。
 
-## 14. 文档规则
+## 15. 文档规则
 
 必须维护：
 
@@ -350,7 +381,7 @@ CI 必须检查禁止文件：
 
 文档必须用简体中文，除非是代码、路径、命令、API 名称。
 
-## 15. Demo 规则
+## 16. Demo 规则
 
 Demo 必须固定脚本，禁止临场发挥。
 
@@ -365,7 +396,7 @@ Demo 必须固定脚本，禁止临场发挥。
 7. 取消订单并恢复库存；
 8. 展示 Vercel Preview。
 
-## 16. Definition of Done
+## 17. Definition of Done
 
 一个功能只有满足以下条件才算完成：
 
@@ -381,7 +412,7 @@ Demo 必须固定脚本，禁止临场发挥。
 - 没有 `.js` / `.py` 手写文件；
 - 至少一名队友 Review 通过。
 
-## 17. 提交冻结规则
+## 18. 提交冻结规则
 
 截止前 30 分钟进入冻结期。
 
@@ -402,7 +433,7 @@ Demo 必须固定脚本，禁止临场发挥。
 - 修改数据库方案；
 - 临时写 Python/JS 脚本。
 
-## 18. Agent 修改代码前必须检查
+## 19. Agent 修改代码前必须检查
 
 每次修改代码前，Agent 必须先确认：
 
@@ -416,3 +447,59 @@ Demo 必须固定脚本，禁止临场发挥。
 8. 是否需要提醒用户 Review。
 
 如果信息不足，先提问，不要擅自假设。
+
+## 19. 第 3 组 North Food 现场开发规则
+
+第 3 组「North Food」的现场协作规则必须同时遵守本文件的项目级 Agent 指令，并执行以下补充流程。
+
+本节的现场方案由四部分共同组成：根目录 `AGENTS.md` 中的 Agent 宪法、`docs/rfcs/0001-site-constitution.md` 的设计 RFC、`现场文件.md` 中的飞书多维表格配置，以及 `skills/north-food-site-constitution/SKILL.md` 对应的 Codex skill。后续开发前必须同时遵循这四部分，不能只执行其中一部分。
+
+### 19.1 最高原则
+
+1. **RFC first**：任何新增功能、流程改造、接口调整、页面改造或影响交付范围的变更，必须先写 RFC。
+2. **任务看板唯一**：飞书多维表格是第 3 组现场任务认领、状态流转和验收记录的唯一看板。
+3. **认领透明**：不同成员认领任务时，必须同步更新状态、认领人和认领时间。
+4. **交付可复盘**：PR 必须关联 RFC、飞书任务、验证方式和结果。
+
+### 19.2 飞书多维表格
+
+第 3 组现场任务统一维护在飞书多维表格：
+
+- Base：`第 3 组 North Food 开发待办`
+- URL：https://sxddhcrtbqu.feishu.cn/base/ZkmTb8cl9aqfBesBXmic6qTonqe
+- 数据表：`开发任务`
+
+每次开发前必须创建或更新开发任务，至少包含：
+
+- 任务标题；
+- 任务描述；
+- 关联 RFC；
+- 关联文件；
+- 优先级；
+- 验收标准；
+- 初始状态：`待认领`。
+
+### 19.3 认领、阻塞和完成规则
+
+成员认领任务时必须同步更新飞书多维表格：
+
+- `状态`：`已认领` 或 `进行中`；
+- `认领人`：当前负责人；
+- `认领时间`：当前时间。
+
+如任务存在阻塞：
+
+- `状态` 改为 `已阻塞`；
+- `备注` 中说明阻塞原因。
+
+任务完成后：
+
+- `状态` 改为 `待评审` 或 `已完成`；
+- `备注` 中记录实现摘要、验证结果和未解决事项；
+- PR 描述中关联 RFC、飞书任务、验证方式和风险。
+
+### 19.4 现场文件与 Skill
+
+- `现场文件.md`：记录飞书多维表格配置、字段说明和现场开发流程。
+- `skills/north-food-site-constitution/SKILL.md`：给 Codex 使用的第 3 组现场开发宪法 skill。
+- `docs/rfcs/0001-site-constitution.md`：记录本现场规则的设计 RFC。
