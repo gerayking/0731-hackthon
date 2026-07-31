@@ -25,6 +25,8 @@ Accepted
 
 ## 设计
 
+本 RFC 定义的现场方案由四部分共同落地：根目录 `AGENTS.md` 中的 Agent 宪法、`现场文件.md` 中的飞书多维表格配置、飞书多维表格 `第3组-绿色Ibis配送系统开发待办` 本身，以及 `skills/green-ibis-site-constitution` 这个 Codex skill。
+
 ### 根目录宪法
 
 新增 `AGENTS.md`，包含：

@@ -452,6 +452,8 @@ Demo 必须固定脚本，禁止临场发挥。
 
 第 3 组「绿色 Ibis 配送系统」的现场协作规则必须同时遵守本文件的项目级 Agent 指令，并执行以下补充流程。
 
+本节的现场方案由四部分共同组成：根目录 `AGENTS.md` 中的 Agent 宪法、`docs/rfcs/0001-site-constitution.md` 的设计 RFC、`现场文件.md` 中的飞书多维表格配置，以及 `skills/green-ibis-site-constitution/SKILL.md` 对应的 Codex skill。后续开发前必须同时遵循这四部分，不能只执行其中一部分。
+
 ### 19.1 最高原则
 
 1. **RFC first**：任何新增功能、流程改造、接口调整、页面改造或影响交付范围的变更，必须先写 RFC。
